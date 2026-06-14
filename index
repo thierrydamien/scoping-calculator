@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:var(--color-background-tertiary,#f5f5f5);color:var(--color-text-primary,#1a1a1a);padding:0 0 2rem}
+.top-bar{background:#012B3A;padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top-bar-left{display:flex;align-items:center;gap:10px}
+.top-bar h1{color:#fff;font-size:15px;font-weight:500}
+.top-bar-right{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);border-radius:20px;padding:4px 10px 4px 6px}
+.top-bar-right .avatar{width:22px;height:22px;border-radius:50%;background:#FF4C46;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:#fff;flex-shrink:0}
+.top-bar-right span{font-size:12px;color:rgba(255,255,255,0.7)}
+.top-bar-right a{font-size:12px;color:#DFFFDE;font-weight:500;text-decoration:none;cursor:pointer}
+.top-bar-right a:hover{text-decoration:underline}
+.step-nav{display:flex;align-items:center;background:var(--color-background-primary,#fff);padding:0 1.5rem;overflow-x:auto}
+.step-item{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:13px;color:var(--color-text-tertiary,#999);white-space:nowrap;flex-shrink:0;cursor:pointer}
+.step-item.active{color:#FF4C46;font-weight:500}
+.step-item.done{color:var(--color-text-secondary,#666)}
+.step-item.done:hover{color:#FF4C46}
+.step-num{width:20px;height:20px;border-radius:50%;background:transparent;border:1.5px solid var(--color-border-secondary,rgba(0,0,0,0.2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;color:var(--color-text-tertiary,#999)}
+.step-item.active .step-num{background:transparent;border:2px solid #FF4C46;color:#FF4C46}
+.step-item.done .step-num{background:#012B3A;border-color:#012B3A;color:#fff}
+.progress-track{height:3px;background:var(--color-border-tertiary,rgba(0,0,0,0.08));position:relative}
+.progress-fill{height:100%;background:#FF4C46;transition:width 0.3s;width:25%}
+.progress-meta{display:flex;justify-content:space-between;padding:6px 1.5rem;font-size:11px;color:var(--color-text-tertiary,#999);background:var(--color-background-primary,#fff);border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12))}
+.container{max-width:720px;margin:0 auto;padding:1.5rem}
+.card{background:var(--color-background-primary,#fff);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:12px;padding:1.25rem}
+.card+.card{margin-top:1rem}
+h2{font-size:16px;font-weight:500;margin-bottom:4px}
+.muted{font-size:13px;color:var(--color-text-secondary,#666)}
+.section-divider{border:none;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.1));margin:1.25rem 0}
+.subsection-title{font-size:13px;font-weight:500;color:var(--color-text-secondary,#666);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+label.field-label{display:block;font-size:13px;color:var(--color-text-secondary,#666);margin-bottom:6px;font-weight:500}
+select,input[type=number],input[type=text]{width:100%;padding:8px 10px;border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.25));border-radius:8px;font-size:14px;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a);font-family:Arial,sans-serif}
+select:focus,input[type=number]:focus,input[type=text]:focus{outline:none;border-color:#FF4C46}
+input.error{border-color:#FF4C46;background:#fff8f8}
+.field-error{font-size:12px;color:#FF4C46;margin-top:4px}
+.field-hint{font-size:11px;color:var(--color-text-tertiary,#999);margin-top:4px}
+.toggle-row{display:flex;align-items:flex-start;justify-content:space-between;padding:10px 0;gap:12px}
+.toggle-row+.toggle-row{border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))}
+.toggle-label{font-size:14px;line-height:1.4}
+.toggle-sublabel{font-size:12px;color:var(--color-text-tertiary,#999);margin-top:2px}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0;margin-top:1px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--color-border-secondary,rgba(0,0,0,0.2));border-radius:11px;cursor:pointer;transition:background 0.2s}
+.toggle input:checked+.toggle-track{background:#FF4C46}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform 0.2s;pointer-events:none}
+.toggle input:checked~.toggle-thumb{transform:translateX(18px)}
+.context-card{background:var(--color-background-secondary,#f8f8f8);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.1));border-radius:10px;padding:6px 14px;margin-top:4px}
+.hs-product{border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:10px;overflow:hidden;margin-bottom:8px}
+.hs-product-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--color-background-primary,#fff)}
+.hs-product-header:hover{background:var(--color-background-secondary,#f8f8f8)}
+.hs-product.active .hs-product-header{background:#fff8f8;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))}
+.hs-product-name{font-size:14px;font-weight:500}
+.hs-product-body{padding:10px 14px;display:none;background:var(--color-background-secondary,#f8f8f8)}
+.hs-product.active .hs-product-body{display:block}
+.detail-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.detail-row label{font-size:13px;color:var(--color-text-secondary,#666);white-space:nowrap}
+.detail-row input[type=number]{width:90px}
+.dk-inline{display:flex;align-items:center;gap:5px}
+.dk-inline input[type=checkbox]{width:14px;height:14px;accent-color:#FF4C46;cursor:pointer}
+.dk-inline label{font-size:12px;color:var(--color-text-secondary,#666);cursor:pointer}
+.pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:8px}
+.pkg-card{border:1.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:10px;padding:12px;cursor:pointer;transition:all 0.15s;position:relative;background:var(--color-background-primary,#fff)}
+.pkg-card:hover:not([style*="pointer-events:none"]){border-color:#FF4C46}
+.pkg-card.selected{border-color:#FF4C46;background:#fff5f5}
+.pkg-card.recommended{border-color:#012B3A}
+.pkg-card.recommended.selected{border-color:#FF4C46;background:#fff5f5}
+.rec-badge{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#012B3A;color:#DFFFDE;font-size:10px;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.pkg-name{font-size:14px;font-weight:500;margin-bottom:2px}
+.pkg-calc-price{font-size:16px;font-weight:500;color:#FF4C46;margin:4px 0 2px}
+.pkg-price{font-size:11px;color:var(--color-text-secondary,#666)}
+.pkg-arr{font-size:11px;color:var(--color-text-tertiary,#999);margin-top:2px}
+.recap-card{background:var(--color-background-secondary,#f8f8f8);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--color-text-secondary,#666);display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.recap-card b{color:var(--color-text-primary,#1a1a1a);font-weight:500}
+.valueprop{background:#DFFFDE;border-radius:8px;padding:10px 12px;font-size:13px;color:#0f5a3a;margin-bottom:12px;font-weight:500}
+.upgrade-panel{border:1.5px solid #FF4C46;border-radius:10px;padding:14px;margin-top:12px}
+.upgrade-panel-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.upgrade-panel-header h3{font-size:14px;font-weight:500;color:#FF4C46;display:flex;align-items:center;gap:6px}
+.upgrade-panel-body{margin-top:12px;display:none}
+.upgrade-panel.open .upgrade-panel-body{display:block}
+.upgrade-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.upgrade-col{border-radius:8px;padding:10px 12px}
+.upgrade-col.current{background:var(--color-background-secondary,#f5f5f5);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12))}
+.upgrade-col.next{background:#fff5f5;border:0.5px solid #FF4C46}
+.upgrade-col-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;color:var(--color-text-secondary,#666)}
+.upgrade-col.next .upgrade-col-title{color:#FF4C46}
+.upgrade-item{font-size:13px;padding:3px 0;display:flex;gap:6px;align-items:flex-start;line-height:1.4}
+.upgrade-item::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px;background:var(--color-border-secondary,rgba(0,0,0,0.3))}
+.upgrade-col.next .upgrade-item::before{background:#FF4C46}
+.upgrade-item.new-feature{font-weight:500;color:#012B3A}
+.upgrade-col.next .upgrade-item.new-feature::before{background:#012B3A}
+.price-delta{background:#012B3A;color:#DFFFDE;border-radius:6px;padding:6px 10px;font-size:12px;margin-top:10px;display:inline-block}
+.deliverables-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:520px){.deliverables-grid{grid-template-columns:1fr}.upgrade-grid{grid-template-columns:1fr}}
+.del-card{border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:8px;padding:10px 12px}
+.del-title{font-size:12px;font-weight:500;color:var(--color-text-secondary,#666);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
+.del-item{font-size:13px;padding:3px 0;display:flex;gap:6px;align-items:flex-start;line-height:1.4}
+.del-item::before{content:'';width:5px;height:5px;border-radius:50%;background:#FF4C46;flex-shrink:0;margin-top:5px}
+.addon-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 0}
+.addon-row+.addon-row{border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))}
+.addon-info{flex:1}
+.addon-name{font-size:14px;font-weight:500}
+.addon-desc{font-size:12px;color:var(--color-text-secondary,#666);margin-top:2px;line-height:1.4}
+.hours-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.hours-row label{font-size:13px;color:var(--color-text-secondary,#666);white-space:nowrap}
+.hours-total{font-size:13px;font-weight:500;color:#012B3A}
+.addon-note{font-size:11px;color:var(--color-text-tertiary,#999);margin-top:4px}
+.hint-box{background:#f0f7ff;border:0.5px solid #b3d4f5;border-radius:8px;padding:8px 12px;font-size:12px;color:#1a4a7a;margin-bottom:8px;line-height:1.5}
+.warn-hours{background:#fff8e1;border:0.5px solid #f0c040;border-radius:8px;padding:8px 12px;font-size:12px;color:#7a5c00;margin-top:6px;display:none}
+.reach-out-box{background:#DFFFDE;border:0.5px solid #012B3A;border-radius:8px;padding:10px 12px;font-size:13px;color:#012B3A;margin-top:8px}
+.warning-box{background:#fff8e1;border:0.5px solid #f0c040;border-radius:8px;padding:10px 12px;font-size:13px;color:#7a5c00;margin-top:10px}
+.info-box{background:var(--color-background-secondary,#f8f8f8);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:8px;padding:10px 12px;font-size:13px;color:var(--color-text-secondary,#666);margin-top:10px}
+.section-title{font-size:15px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title i{color:#FF4C46}
+.total-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--color-border-tertiary,rgba(0,0,0,0.12));margin-top:4px}
+.total-label{font-size:14px;font-weight:500}
+.total-price{font-size:18px;font-weight:500;color:#FF4C46}
+.sku-chip{display:inline-block;background:var(--color-background-secondary,#f0f0f0);border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.2));border-radius:6px;padding:2px 8px;font-size:11px;font-family:monospace;margin-left:6px;color:var(--color-text-secondary,#666)}
+.proposal-header{background:#012B3A;border-radius:12px 12px 0 0;padding:14px 18px;margin:-1.25rem -1.25rem 1rem;color:#fff}
+.proposal-header .ph-title{font-size:17px;font-weight:500}
+.proposal-header .ph-sub{font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px}
+.btn-row{display:flex;gap:10px;margin-top:1.5rem;flex-wrap:wrap}
+.btn{padding:9px 18px;border-radius:8px;border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.25));font-size:14px;cursor:pointer;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a);font-family:Arial,sans-serif}
+.btn:hover{background:var(--color-background-secondary,#f5f5f5)}
+.btn:disabled{opacity:0.6;cursor:wait}
+.btn-primary{background:#FF4C46;color:#fff;border-color:#FF4C46}
+.btn-primary:hover{background:#e03d37}
+.btn-outline-dark{border-color:#012B3A;color:#012B3A}
+.btn-outline-dark:hover{background:#DFFFDE}
+.btn-sm{padding:6px 12px;font-size:13px}
+.hide{display:none!important}
+.gantt-scroll-wrap{overflow-x:auto;border-radius:8px;border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.1))}
+.gantt-header-cell{font-size:11px;color:#DFFFDE;text-align:center;font-weight:500;padding:7px 2px}
+.gantt-header-label{font-size:12px;color:#DFFFDE;padding:7px 8px;font-weight:500}
+.gantt-section{padding:5px 8px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-secondary,#666);background:var(--color-background-secondary,#f5f5f5);border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.1))}
+.gantt-row{display:grid;align-items:center;padding:3px 0;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.06))}
+.gantt-row-label{font-size:12px;padding:0 8px;line-height:1.3;color:var(--color-text-primary,#1a1a1a)}
+.gantt-row-label .owner{font-size:10px;color:var(--color-text-tertiary,#999);display:block;margin-top:1px}
+.gantt-cell{padding:2px 3px;height:22px;display:flex;align-items:center}
+.gantt-bar{height:14px;border-radius:3px;width:100%}
+.bar-hs{background:#FF4C46}
+.bar-client{background:#012B3A}
+.bar-joint{background:#7ec8a0}
+.bar-training{background:#f0a500}
+.bar-ongoing{background:#cce5ff;border:0.5px solid #99c8f0}
+.gantt-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+.gantt-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary,#666)}
+.gantt-legend-dot{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+.gantt-footer{padding:8px;background:#fff0f0;border-top:2px solid #FF4C46;border-radius:0 0 8px 8px;font-size:11px;font-weight:500;color:#FF4C46;text-align:center}
+.multi-year-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))}
+.multi-year-row label{font-size:13px;color:var(--color-text-secondary,#666);white-space:nowrap}
+.multi-year-row select{width:auto;min-width:120px}
+@media print{.top-bar,.step-nav,.progress-track,.progress-meta,.btn-row,#step-1,#step-2,#step-3{display:none!important}.container{max-width:100%;padding:0}.card{border:none;page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <div class="top-bar-left">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#FF4C46"/><path d="M6 12h12M6 8h8M6 16h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <h1>Professional Services Scoping Calculator <span style="font-weight:400;color:rgba(255,255,255,0.6);font-size:12px">(last updated June 11th)</span></h1>
+  </div>
+  <div class="top-bar-right">
+    <div class="avatar">DT</div>
+    <span>Questions or feedback?</span>
+    <a onclick="pingSlack()">Ping Damien Thierry</a>
+  </div>
+</div>
+<div class="step-nav">
+  <div class="step-item active" id="nav-1" onclick="navToStep(1)"><span class="step-num" id="snum-1">1</span> Deal details</div>
+  <div class="step-item" id="nav-2" onclick="navToStep(2)"><span class="step-num" id="snum-2">2</span> Package</div>
+  <div class="step-item" id="nav-3" onclick="navToStep(3)"><span class="step-num" id="snum-3">3</span> Add-ons</div>
+  <div class="step-item" id="nav-4" onclick="navToStep(4)"><span class="step-num" id="snum-4">4</span> Summary</div>
+</div>
+<div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+<div class="progress-meta"><span id="progress-label">Step 1 of 4</span><span>About 2 min to complete</span></div>
+<div class="container">
+
+<div id="step-1">
+<div class="card">
+  <h2>Deal details</h2>
+  <p class="muted" style="margin-bottom:1.25rem">Enter the opportunity information to determine the recommended package.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div><label class="field-label">Client name</label><input type="text" id="client-name" placeholder="e.g. Acme Corp"></div>
+    <div><label class="field-label">Opportunity name <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional)</span></label><input type="text" id="opp-name" placeholder="e.g. Acme Corp FY26 Renewal"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><label class="field-label">Region</label><select id="region"><option value="">Select region</option><option value="NA">North America (NA)</option><option value="LATAM">Latin America (LATAM)</option><option value="EMEA">EMEA</option><option value="APAC">APAC</option></select></div>
+    <div><label class="field-label">Total tech ARR (USD)</label><input type="number" id="arr-input" placeholder="e.g. 75000" min="0" step="1000"><div class="field-hint" id="arr-hint">ARR determines which packages are available.</div><div class="field-error hide" id="arr-error">Please enter the total tech ARR to continue.</div></div>
+  </div>
+  <hr class="section-divider">
+  <div class="subsection-title">Hootsuite products</div>
+  <div id="hs-products">
+    <div class="hs-product" id="prod-hse"><div class="hs-product-header" onclick="toggleHsProd('hse')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-hse" onchange="onHsCheck('hse',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">HSE</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="hse-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label>Number of seats</label><input type="number" id="hse-seats" min="1" placeholder="e.g. 50" oninput="updateHsSummary('hse')"><span class="dk-inline"><input type="checkbox" id="dk-hse" onchange="setUnknown('hse-seats','hse',this.checked)"><label for="dk-hse">Don't know yet</label></span></div></div></div>
+    <div class="hs-product" id="prod-inbox"><div class="hs-product-header" onclick="toggleHsProd('inbox')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-inbox" onchange="onHsCheck('inbox',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Advanced Inbox</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="inbox-summary"></span></div><div class="hs-product-body"><p style="font-size:13px;color:var(--color-text-secondary,#666)">No additional scoping details needed.</p></div></div>
+    <div class="hs-product" id="prod-analytics"><div class="hs-product-header" onclick="toggleHsProd('analytics')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-analytics" onchange="onHsCheck('analytics',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Advanced Analytics</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="analytics-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label>Number of connections</label><input type="number" id="analytics-connections" min="1" placeholder="e.g. 10" oninput="updateHsSummary('analytics')"><span class="dk-inline"><input type="checkbox" id="dk-analytics" onchange="setUnknown('analytics-connections','analytics',this.checked)"><label for="dk-analytics">Don't know yet</label></span></div></div></div>
+    <div class="hs-product" id="prod-listening"><div class="hs-product-header" onclick="toggleHsProd('listening')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-listening" onchange="onHsCheck('listening',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Listening</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="listening-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label>Number of queries</label><input type="number" id="listening-queries" min="1" placeholder="e.g. 5" oninput="updateHsSummary('listening')"><span class="dk-inline"><input type="checkbox" id="dk-listening" onchange="setUnknown('listening-queries','listening',this.checked)"><label for="dk-listening">Don't know yet</label></span></div></div></div>
+    <div class="hs-product" id="prod-amplify"><div class="hs-product-header" onclick="toggleHsProd('amplify')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-amplify" onchange="onHsCheck('amplify',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Amplify</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="amplify-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label>Number of seats</label><input type="number" id="amplify-seats" min="1" placeholder="e.g. 100" oninput="updateHsSummary('amplify')"><span class="dk-inline"><input type="checkbox" id="dk-amplify" onchange="setUnknown('amplify-seats','amplify',this.checked)"><label for="dk-amplify">Don't know yet</label></span></div></div></div>
+  </div>
+  <hr class="section-divider">
+  <div class="subsection-title">Talkwalker</div>
+  <div class="toggle-row" style="padding:6px 0"><div><div class="toggle-label">Include Talkwalker</div></div><label class="toggle"><input type="checkbox" id="has-tw" onchange="onTwChange(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+  <div id="tw-tier-row" class="hide" style="margin-top:8px"><label class="field-label">Talkwalker product tier</label><select id="tw-tier" onchange="onTwTierChange()"><option value="core">TW Core</option><option value="analyze">TW Analyze / Research / Deep Research / Agency</option><option value="business">TW Business / Premium</option></select></div>
+  <hr class="section-divider">
+  <div class="subsection-title">Deal flags</div>
+  <p class="muted" style="margin-bottom:6px;font-size:12px">These can affect the recommended package.</p>
+  <div class="context-card">
+    <div class="toggle-row"><div><div class="toggle-label">Migration from another platform</div><div class="toggle-sublabel">Sprinklr, Sprout, Meltwater, etc.</div></div><label class="toggle"><input type="checkbox" id="is-migration"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+    <div class="toggle-row"><div><div class="toggle-label">Global / multi-region rollout</div><div class="toggle-sublabel">Multiple regions, timezones, or 1,000+ existing users</div></div><label class="toggle"><input type="checkbox" id="is-global"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+  </div>
+  <div class="field-error hide" id="products-error" style="margin-top:14px">Please select at least one Hootsuite product or Talkwalker to continue.</div>
+</div>
+<div class="btn-row"><button class="btn btn-primary" onclick="goStep(2)">Continue <i class="ti ti-arrow-right"></i></button></div>
+</div>
+
+<div id="step-2" class="hide">
+<div class="recap-card" id="recap-card"></div>
+<div class="card" id="rec-banner" style="background:#DFFFDE;border-color:#012B3A;margin-bottom:1rem">
+  <div style="display:flex;align-items:center;gap:10px">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#012B3A"/><path d="M6 10l3 3 5-5" stroke="#DFFFDE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><div style="font-weight:500;color:#012B3A;font-size:14px" id="rec-text"></div><div style="font-size:12px;color:#0f5a3a" id="rec-reason"></div></div>
+  </div>
+</div>
+<div class="card">
+  <div class="section-title"><i class="ti ti-package" aria-hidden="true"></i> Select service package</div>
+  <div id="warning-tw-plus" class="warning-box hide">Talkwalker is in the quote but ARR is under $25K. Minimum package is Plus.</div>
+  <div class="pkg-grid" id="pkg-grid" style="margin-top:14px"></div>
+  <div id="upgrade-panel-wrap" class="hide" style="margin-top:12px">
+    <div class="upgrade-panel open" id="upgrade-panel">
+      <div class="upgrade-panel-header" onclick="toggleUpgradePanel()">
+        <h3><i class="ti ti-trending-up" aria-hidden="true"></i> Why consider upgrading to <span id="upgrade-target-name">Advanced</span>?</h3>
+        <i class="ti ti-chevron-down" id="upgrade-chevron" style="color:#FF4C46;transition:transform 0.2s;transform:rotate(180deg)"></i>
+      </div>
+      <div class="upgrade-panel-body">
+        <div class="upgrade-grid" id="upgrade-grid"></div>
+        <div id="upgrade-price-delta" class="price-delta"></div>
+      </div>
+    </div>
+  </div>
+  <div id="top-tier-note" class="info-box hide" style="margin-top:12px">This is the highest service tier available for this deal.</div>
+</div>
+<div class="card" style="margin-top:1rem">
+  <div class="section-title"><i class="ti ti-clipboard-list" aria-hidden="true"></i> What's included</div>
+  <div id="valueprop-box" class="valueprop"></div>
+  <div id="deliverables-content"></div>
+</div>
+<div class="btn-row"><button class="btn" onclick="goStep(1)"><i class="ti ti-arrow-left"></i> Back</button><button class="btn btn-primary" onclick="goStep(3)">Continue <i class="ti ti-arrow-right"></i></button></div>
+</div>
+
+<div id="step-3" class="hide">
+<div class="card">
+  <div class="section-title"><i class="ti ti-puzzle" aria-hidden="true"></i> Add-ons</div>
+  <div id="addon-essentials-warning" class="info-box hide">No add-ons available for Essentials. Add-ons require Plus or above.</div>
+  <div id="addon-ses-included" class="info-box hide">Strategic Engagement Services is already included in Elite.</div>
+  <div id="addon-list"></div>
+</div>
+<div class="btn-row"><button class="btn" onclick="goStep(2)"><i class="ti ti-arrow-left"></i> Back</button><button class="btn btn-primary" onclick="goStep(4)">Continue <i class="ti ti-arrow-right"></i></button></div>
+</div>
+
+<div id="step-4" class="hide">
+<div class="card" id="proposal-card">
+  <div class="proposal-header">
+    <div class="ph-title" id="ph-title">Proposal</div>
+    <div class="ph-sub" id="ph-sub"></div>
+  </div>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1rem">
+    <div><div style="font-size:18px;font-weight:500" id="sum-pkg-name"></div><div class="muted" id="sum-sku" style="margin-top:2px"></div></div>
+    <div style="background:#FF4C46;color:#fff;padding:6px 14px;border-radius:8px;font-size:16px;font-weight:500" id="sum-base-price"></div>
+  </div>
+  <div id="sum-deliverables"></div>
+  <div style="margin-top:1.25rem"><div class="section-title" style="font-size:14px"><i class="ti ti-puzzle" aria-hidden="true"></i> Add-ons</div><div id="sum-addons-content"></div></div>
+  <div style="margin-top:1.25rem"><div class="section-title" style="font-size:14px"><i class="ti ti-receipt" aria-hidden="true"></i> Pricing</div>
+    <div id="price-breakdown"></div>
+    <div class="multi-year-row">
+      <label>Contract length:</label>
+      <select id="sum-years" onchange="updateMultiYear(this.value)"><option value="1">1 year</option><option value="2">2 years</option><option value="3">3 years</option></select>
+      <span id="multi-year-note" style="font-size:12px;color:var(--color-text-secondary,#666)"></span>
+    </div>
+    <div class="total-row"><div class="total-label">Estimated total services <span id="total-year-label">(Year 1)</span></div><div class="total-price" id="total-price-display"></div></div>
+    <div class="info-box" style="margin-top:8px;font-size:12px">Prices in USD. The package fee is recurring (multiplied by contract length). Expert Hours and SES are one-time scopes and are not multiplied. Package % applies to total tech ARR annually.</div>
+  </div>
+  <div style="margin-top:1.25rem"><div class="section-title" style="font-size:14px"><i class="ti ti-calendar" aria-hidden="true"></i> Implementation timeline</div>
+    <div class="gantt-scroll-wrap"><div id="gantt-container"></div></div>
+    <div class="gantt-legend" id="gantt-legend"></div>
+  </div>
+</div>
+<div class="btn-row">
+  <button class="btn" onclick="goStep(3)"><i class="ti ti-arrow-left"></i> Back</button>
+  <button class="btn btn-outline-dark" id="pptx-btn" onclick="downloadPPTX()"><i class="ti ti-download" aria-hidden="true"></i> Download PPTX</button>
+  <button class="btn" id="pdf-btn" onclick="downloadPDF()"><i class="ti ti-file-text" aria-hidden="true"></i> Download PDF</button>
+  <button class="btn" id="share-btn" onclick="copyShareLink()"><i class="ti ti-link" aria-hidden="true"></i> Copy share link</button>
+  <button class="btn" onclick="resetAll()"><i class="ti ti-refresh"></i> New quote</button>
+</div>
+<div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+  <button class="btn btn-primary" id="sendps-btn" onclick="sendToPS()"><i class="ti ti-send" aria-hidden="true"></i> Send to PS</button>
+  <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--color-text-secondary,#666);cursor:pointer">
+    <input type="checkbox" id="ps-alert-check" style="accent-color:#FF4C46;width:14px;height:14px">
+    Also alert PS leadership
+  </label>
+  <span id="ps-validation-note" style="font-size:12px;color:#FF4C46;display:none"><i class="ti ti-alert-triangle"></i> Validation required — alert will fire automatically</span>
+</div>
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+var PS_ENDPOINT='https://script.google.com/a/macros/hootsuite.com/s/AKfycbwfNxnypoi3Izrkf2fDaeeFtBjEjfqDrqDi8ZqwQZkW8d6bUpjOFuAae16GM64jPdCw/exec';
+
+function sendToPS(){
+var needsValidation=false;var validationReasons=[];
+if(state.pkg==='plus'&&state.expertHrs>5){needsValidation=true;validationReasons.push('Expert Hours >5 on Plus');}
+if(state.pkg==='plus'&&state.sesQty>0){needsValidation=true;validationReasons.push('SES added to Plus');}
+var alertBox=document.getElementById('ps-alert-check');
+var alertRequested=alertBox?alertBox.checked:false;
+if(!needsValidation&&!alertRequested)return actualSend(false,false,needsValidation,'');
+actualSend(needsValidation,alertRequested,needsValidation,validationReasons.join(', '));
+}
+
+function actualSend(needsValidation,alertRequested,flagged,validationReason){
+var aeName=sessionStorage.getItem('ps_ae_name')||'';
+if(!aeName){aeName=prompt('Your name (saved for this session):','');if(!aeName)return;sessionStorage.setItem('ps_ae_name',aeName);}
+var btn=document.getElementById('sendps-btn');var orig=btn.innerHTML;
+btn.disabled=true;btn.innerHTML='Sending...';
+var prodNames={hse:'HSE',inbox:'Adv Inbox',analytics:'Adv Analytics',listening:'Listening',amplify:'Amplify'};
+var prods=[];var ids=['hse','inbox','analytics','listening','amplify'];
+for(var i=0;i<ids.length;i++){if(state.hsProducts[ids[i]].on)prods.push(prodNames[ids[i]]);}
+if(state.hasTW)prods.push('TW '+state.twTier);
+var oneTime=(state.expertHrs*450)+((state.pkg!=='elite')?state.sesQty*20000:0);
+var total=Math.round(calcPrice(state.pkg))*state.contractYears+oneTime;
+var shareLink=location.href.split('#')[0]+'#q='+encodeURIComponent(btoa(JSON.stringify(state)));
+var payload={
+aeName:aeName,clientName:state.clientName,oppName:state.oppName,region:state.region,
+arr:state.arr,pkg:PKGS[state.pkg].name,products:prods,expertHrs:state.expertHrs,
+sesQty:state.sesQty,contractYears:state.contractYears,total:total,
+isMigration:state.isMigration,isGlobal:state.isGlobal,
+needsValidation:needsValidation,validationReason:validationReason,
+alertRequested:alertRequested,shareLink:shareLink
+};
+fetch(PS_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+.then(function(){btn.innerHTML='<i class="ti ti-check"></i> Sent';setTimeout(function(){btn.disabled=false;btn.innerHTML=orig;},2500);})
+.catch(function(){btn.disabled=false;btn.innerHTML=orig;alert('Could not send. Ping Damien directly.');});
+}
+
+var PKGS={essentials:{name:'Essentials',sku:'PS_ESSENTIALS',flat:2000,pct:0},plus:{name:'Plus',sku:'PS_PLUS',flat:4000,pct:0.15},advanced:{name:'Advanced',sku:'PS_ADV',flat:18000,pct:0.18},elite:{name:'Elite',sku:'PS_ELITE',flat:50000,pct:0.20}};
+var VALUEPROPS={essentials:'Speed to value: live in hours with self-paced digital onboarding, no scheduling bottlenecks.',plus:'Expert-accelerated implementation: power users driving value within the first 90 days.',advanced:'Use-case customised onboarding with a dedicated Technical Account Manager and ongoing optimization.',elite:'White-glove program and change management for complex, high-stakes, multi-team rollouts.'};
+var DELIVERABLES={
+essentials:{onboarding:['Group kickoff call','Account provisioning support','Self-paced digital onboarding via Sana','Digital email series'],support:['Standard support (24h SLA)','Help Centre, chat and email','Mon-Fri 9-5 local time']},
+plus:{onboarding:['1:1 admin enablement sessions per product','End-user digital training via Sana','Requirements gathering and scope alignment','Weekly syncs throughout onboarding','Launch graduation plus AM/CSM handover'],support:['Standard support (24h SLA)','Help Centre, chat and email','Mon-Fri 9-5 local time'],tw:{core:['Up to 5 queries/topics','5 channel setup','1 dashboard/report/alert','2x 1:1 training sessions'],analyze:['Up to 15 queries/topics','20 channel setup','1 dashboard/report/alert','3x 1:1 training sessions'],business:['Up to 20 queries/topics','40 channel setup','3 dashboards/reports/alerts','3x 1:1 training sessions']}},
+advanced:{onboarding:['Named Technical Account Manager','Up to 2x admin sessions per product','Blended training plan for end-users (up to 7 live sessions)','Customised onboarding to your use case','Up to 12 optimization sessions/year'],support:['Priority support (4h SLA)','Phone for 5 named contacts','24/7 on-call for business-critical issues','Help Centre, chat, email and phone'],tw:{core:['Up to 10 queries/topics','10 channel setup','3x 1:1 training sessions','Up to 1 catalogue session'],analyze:['Up to 20 queries/topics','25 channel setup','2 dashboards/reports/alerts','6x 1:1 live trainings'],business:['Up to 40 queries/topics','60 channel setup','5 dashboards/reports/alerts','6x 1:1 live trainings']}},
+elite:{onboarding:['Named Technical Account Manager','Named Engagement Manager (program and change management)','Up to 3x admin sessions per product','Blended training plan for end-users (up to 13 live sessions)','Up to 24 optimization sessions/year','ADKAR-based change management','Strategic Engagement Services included'],support:['Priority support (2h SLA)','Phone for 10 named contacts','24/7 on-call for business-critical issues','Help Centre, chat, email and phone'],tw:{core:['Up to 20 queries/topics','20 channel setup','3x 1:1 training sessions plus up to 2 catalogue'],analyze:['Up to 20 queries/topics','25 channel setup','2 dashboards/reports/alerts','8x 1:1 live trainings'],business:['Up to 40 queries/topics','60 channel setup','5 dashboards/reports/alerts','8x 1:1 live trainings']}}
+};
+var UPGRADE_DIFFS={
+'essentials-plus':['1:1 admin implementation (was self-led)','IC-led onboarding','Requirements gathering session','Weekly syncs during onboarding'],
+'plus-advanced':['Live end-user training (up to 7 sessions vs digital only)','Named Technical Account Manager','12 optimization sessions per year','Priority support 4h SLA (was 24h)','Phone support for 5 named contacts','2x admin sessions per product (was 1x)'],
+'advanced-elite':['Named Engagement Manager','ADKAR change management program','Strategic Engagement Services included','24 optimization sessions per year (was 12)','Up to 13 live end-user sessions (was 7)','2h SLA and 10 phone contacts (was 4h and 5)']
+};
+var state={clientName:'',oppName:'',region:'',arr:0,contractYears:1,hsProducts:{hse:{on:false,unknown:false},inbox:{on:false},analytics:{on:false,unknown:false},listening:{on:false,unknown:false},amplify:{on:false,unknown:false}},hasTW:false,twTier:'analyze',isMigration:false,isGlobal:false,pkg:'',lastRec:'',expertHrs:0,sesQty:0,completedSteps:[]};
+var warnTimer=null;
+
+function saveState(){try{sessionStorage.setItem('ps_calc_state',JSON.stringify(state));}catch(e){}}
+function loadState(){try{var s=sessionStorage.getItem('ps_calc_state');if(s){state=JSON.parse(s);restoreFormFromState();}}catch(e){}}
+function restoreFormFromState(){
+document.getElementById('client-name').value=state.clientName||'';
+document.getElementById('opp-name').value=state.oppName||'';
+document.getElementById('region').value=state.region||'';
+document.getElementById('arr-input').value=state.arr||'';
+document.getElementById('is-migration').checked=state.isMigration;
+document.getElementById('is-global').checked=state.isGlobal;
+document.getElementById('has-tw').checked=state.hasTW;
+if(state.hasTW)document.getElementById('tw-tier-row').classList.remove('hide');
+document.getElementById('tw-tier').value=state.twTier||'analyze';
+var ids=['hse','inbox','analytics','listening','amplify'];
+for(var i=0;i<ids.length;i++){var id=ids[i];var p=state.hsProducts[id];document.getElementById('chk-'+id).checked=p.on;if(p.on)document.getElementById('prod-'+id).classList.add('active');updateHsSummary(id);}
+}
+function pingSlack(){
+var fallback=setTimeout(function(){window.open('https://slack.com/app_redirect?channel=UBKRN5R9B','_blank');},600);
+try{window.location.href='slack://user?team=&id=UBKRN5R9B';}catch(e){clearTimeout(fallback);window.open('https://slack.com/app_redirect?channel=UBKRN5R9B','_blank');}
+}
+function toggleHsProd(id){var el=document.getElementById('prod-'+id);var chk=document.getElementById('chk-'+id);if(!chk.checked){chk.checked=true;onHsCheck(id,true);}else{el.classList.toggle('active');}}
+function onHsCheck(id,val){state.hsProducts[id].on=val;document.getElementById('prod-'+id).classList.toggle('active',val);updateHsSummary(id);saveState();}
+function setUnknown(inputId,prodId,val){var inp=document.getElementById(inputId);if(val){inp.value='';inp.disabled=true;inp.placeholder='TBD';state.hsProducts[prodId].unknown=true;}else{inp.disabled=false;inp.placeholder='e.g. 50';state.hsProducts[prodId].unknown=false;}updateHsSummary(prodId);saveState();}
+function updateHsSummary(id){var p=state.hsProducts[id];var s='';var v;if(id==='hse'){v=document.getElementById('hse-seats').value;s=p.unknown?'Seats: TBD':(v?v+' seats':'');}else if(id==='analytics'){v=document.getElementById('analytics-connections').value;s=p.unknown?'Connections: TBD':(v?v+' connections':'');}else if(id==='listening'){v=document.getElementById('listening-queries').value;s=p.unknown?'Queries: TBD':(v?v+' queries':'');}else if(id==='amplify'){v=document.getElementById('amplify-seats').value;s=p.unknown?'Seats: TBD':(v?v+' seats':'');}document.getElementById(id+'-summary').textContent=s;}
+function onTwChange(val){state.hasTW=val;document.getElementById('tw-tier-row').classList.toggle('hide',!val);saveState();}
+function onTwTierChange(){state.twTier=document.getElementById('tw-tier').value;saveState();}
+
+function getRecommendedPkg(){var arr=state.arr;if(arr>=250000)return 'elite';if(arr>=100000||state.isMigration)return 'advanced';if(arr>=25000||state.hasTW){return state.isGlobal?'advanced':'plus';}return 'essentials';}
+function getEligiblePkgs(){
+var order=['essentials','plus','advanced','elite'];
+var rec=getRecommendedPkg();
+var recIdx=order.indexOf(rec);
+var eligible=[order[recIdx]];
+var next=order[recIdx+1];
+if(next){
+if(next==='plus'&&state.arr<25000){}
+else{eligible.push(next);}
+}
+return eligible;
+}
+function calcPrice(k){return Math.max(PKGS[k].flat,state.arr*PKGS[k].pct);}
+
+function updateProgress(n){
+document.getElementById('progress-fill').style.width=(n*25)+'%';
+document.getElementById('progress-label').textContent='Step '+n+' of 4';
+}
+
+function goStep(n){
+if(n===2){
+state.clientName=document.getElementById('client-name').value.trim();
+state.oppName=document.getElementById('opp-name').value.trim();
+state.arr=parseFloat(document.getElementById('arr-input').value)||0;
+var arrOk=state.arr>0;
+var ids=['hse','inbox','analytics','listening','amplify'];
+var anyProduct=document.getElementById('has-tw').checked;
+for(var pi=0;pi<ids.length;pi++){if(document.getElementById('chk-'+ids[pi]).checked)anyProduct=true;}
+document.getElementById('arr-input').classList.toggle('error',!arrOk);
+document.getElementById('arr-error').classList.toggle('hide',arrOk);
+document.getElementById('products-error').classList.toggle('hide',anyProduct);
+if(!arrOk){document.getElementById('arr-input').scrollIntoView({behavior:'smooth',block:'center'});return;}
+if(!anyProduct){document.getElementById('products-error').scrollIntoView({behavior:'smooth',block:'center'});return;}
+computeRec();
+}
+if(n===3)renderAddons();
+if(n===4)renderSummary();
+if(n>1&&state.completedSteps.indexOf(n-1)===-1)state.completedSteps.push(n-1);
+saveState();
+var steps=[1,2,3,4];
+for(var i=0;i<steps.length;i++){
+var idx=steps[i];
+document.getElementById('step-'+idx).classList.toggle('hide',idx!==n);
+var nav=document.getElementById('nav-'+idx);var snum=document.getElementById('snum-'+idx);
+nav.classList.remove('active','done');
+if(idx===n){nav.classList.add('active');snum.innerHTML=idx;}
+else if(state.completedSteps.indexOf(idx)!==-1){nav.classList.add('done');snum.innerHTML='<i class="ti ti-check" style="font-size:11px"></i>';}
+else{snum.innerHTML=idx;}
+}
+updateProgress(n);
+window.scrollTo({top:0,behavior:'smooth'});
+}
+function navToStep(n){if(n===1||state.completedSteps.indexOf(n-1)!==-1||state.completedSteps.indexOf(n)!==-1)goStep(n);}
+
+function computeRec(){
+state.region=document.getElementById('region').value;
+state.hasTW=document.getElementById('has-tw').checked;
+state.isMigration=document.getElementById('is-migration').checked;
+state.isGlobal=document.getElementById('is-global').checked;
+state.twTier=document.getElementById('tw-tier').value;
+var ids=['hse','inbox','analytics','listening','amplify'];
+for(var i=0;i<ids.length;i++){state.hsProducts[ids[i]].on=document.getElementById('chk-'+ids[i]).checked;}
+var rec=getRecommendedPkg();
+var reason='';
+if(rec==='elite')reason='ARR $250K+ - Elite recommended.';
+else if(rec==='advanced')reason='ARR $100K-$250K, migration, or global rollout - Advanced recommended.';
+else if(rec==='plus')reason='ARR $25K-$100K or Talkwalker in quote - Plus recommended.';
+else reason='ARR under $25K (Hootsuite only) - Essentials recommended.';
+document.getElementById('rec-text').textContent='Recommended: '+PKGS[rec].name+' package';
+document.getElementById('rec-reason').textContent=reason;
+document.getElementById('warning-tw-plus').classList.toggle('hide',!(state.hasTW&&state.arr<25000));
+if(state.lastRec!==rec)state.pkg=rec;
+state.lastRec=rec;
+if(!state.pkg||getEligiblePkgs().indexOf(state.pkg)===-1)state.pkg=rec;
+renderRecap();
+renderPkgGrid(rec);renderDeliverables(state.pkg);renderUpgradePanel(state.pkg);
+}
+
+function renderRecap(){
+var parts=[];
+if(state.clientName)parts.push('<b>'+state.clientName+'</b>');
+parts.push('ARR <b>$'+Math.round(state.arr).toLocaleString()+'</b>');
+var prodNames={hse:'HSE',inbox:'Adv Inbox',analytics:'Adv Analytics',listening:'Listening',amplify:'Amplify'};
+var prods=[];var ids=['hse','inbox','analytics','listening','amplify'];
+for(var i=0;i<ids.length;i++){if(state.hsProducts[ids[i]].on)prods.push(prodNames[ids[i]]);}
+if(state.hasTW){var twL={core:'TW Core',analyze:'TW Analyze',business:'TW Business'};prods.push(twL[state.twTier]);}
+if(prods.length)parts.push(prods.join(', '));
+var flags=[];if(state.isMigration)flags.push('Migration');if(state.isGlobal)flags.push('Global');
+if(flags.length)parts.push(flags.join(', '));
+document.getElementById('recap-card').innerHTML='<i class="ti ti-file-description" style="color:#012B3A"></i> '+parts.join('  &middot;  ');
+}
+
+function renderPkgGrid(rec){
+var order=['essentials','plus','advanced','elite'];
+var priceLabel={essentials:'$2,000 flat',plus:'Greater of $4K or 15%',advanced:'Greater of $18K or 18%',elite:'Greater of $50K or 20%'};
+var arrLabel={essentials:'ARR < $25K',plus:'ARR $25K-$100K',advanced:'ARR $100K-$250K',elite:'ARR $250K+'};
+var eligible=getEligiblePkgs();var html='';
+for(var i=0;i<order.length;i++){
+var k=order[i];var p=PKGS[k];var isRec=k===rec;var isSel=state.pkg===k;var disabled=eligible.indexOf(k)===-1;
+var style=disabled?' style="opacity:0.35;cursor:not-allowed;pointer-events:none"':'';
+var calc='$'+Math.round(calcPrice(k)).toLocaleString();
+html+='<div class="pkg-card'+(isSel&&!disabled?' selected':'')+(isRec?' recommended':'')+'"'+style+' onclick="selectPkg(\''+k+'\')">';
+if(isRec)html+='<div class="rec-badge">Recommended</div>';
+html+='<div class="pkg-name">'+p.name+'</div><div class="pkg-calc-price">'+calc+'</div><div class="pkg-price">'+priceLabel[k]+'</div><div class="pkg-arr">'+arrLabel[k]+'</div></div>';
+}
+document.getElementById('pkg-grid').innerHTML=html;
+}
+function selectPkg(k){state.pkg=k;var cards=document.querySelectorAll('.pkg-card');for(var i=0;i<cards.length;i++){cards[i].classList.remove('selected');}event.currentTarget.classList.add('selected');renderDeliverables(k);renderUpgradePanel(k);saveState();}
+
+function renderUpgradePanel(selected){
+var order=['essentials','plus','advanced','elite'];var idx=order.indexOf(selected);var next=order[idx+1];
+var eligible=getEligiblePkgs();var wrap=document.getElementById('upgrade-panel-wrap');var topNote=document.getElementById('top-tier-note');
+var hasUpgrade=next&&eligible.indexOf(next)!==-1&&UPGRADE_DIFFS[selected+'-'+next];
+if(!hasUpgrade){wrap.classList.add('hide');topNote.classList.remove('hide');return;}
+topNote.classList.add('hide');wrap.classList.remove('hide');
+var diffs=UPGRADE_DIFFS[selected+'-'+next];
+document.getElementById('upgrade-target-name').textContent=PKGS[next].name;
+var currentItems=DELIVERABLES[selected].onboarding.slice(0,4);
+var html='<div class="upgrade-col current"><div class="upgrade-col-title">'+PKGS[selected].name+' current</div>';
+for(var i=0;i<currentItems.length;i++){html+='<div class="upgrade-item">'+currentItems[i]+'</div>';}
+html+='</div><div class="upgrade-col next"><div class="upgrade-col-title">'+PKGS[next].name+' what you gain</div>';
+for(var j=0;j<diffs.length;j++){html+='<div class="upgrade-item new-feature">'+diffs[j]+'</div>';}
+html+='</div>';
+document.getElementById('upgrade-grid').innerHTML=html;
+var delta=calcPrice(next)-calcPrice(selected);
+document.getElementById('upgrade-price-delta').textContent='Upgrading to '+PKGS[next].name+' adds about $'+Math.round(delta).toLocaleString()+' to this deal';
+}
+function toggleUpgradePanel(){var p=document.getElementById('upgrade-panel');var ch=document.getElementById('upgrade-chevron');p.classList.toggle('open');ch.style.transform=p.classList.contains('open')?'rotate(180deg)':'rotate(0deg)';}
+
+function renderDeliverables(k){
+document.getElementById('valueprop-box').textContent=VALUEPROPS[k];
+var d=DELIVERABLES[k];var twBlock='';
+if(state.hasTW&&d.tw&&d.tw[state.twTier]){
+var labels={core:'Core',analyze:'Analyze/Research',business:'Business/Premium'};
+var tierLabel=labels[state.twTier];
+twBlock='<div class="del-card"><div class="del-title">Talkwalker ('+tierLabel+')</div>';
+var twItems=d.tw[state.twTier];
+for(var t=0;t<twItems.length;t++){twBlock+='<div class="del-item">'+twItems[t]+'</div>';}
+twBlock+='</div>';
+}
+var onb='';for(var a=0;a<d.onboarding.length;a++){onb+='<div class="del-item">'+d.onboarding[a]+'</div>';}
+var sup='';for(var b=0;b<d.support.length;b++){sup+='<div class="del-item">'+d.support[b]+'</div>';}
+document.getElementById('deliverables-content').innerHTML='<div class="deliverables-grid"><div class="del-card"><div class="del-title">Onboarding and enablement</div>'+onb+'</div><div class="del-card"><div class="del-title">Support</div>'+sup+'</div>'+twBlock+'</div>';
+}
+
+function buildHints(){
+var k=state.pkg;var hints=[];
+if(k==='plus'&&state.hsProducts.hse.on)hints.push('End-user training for HSE is not included in Plus. Add 5 hours of Expert Hours if 1:1 end-user training is needed.');
+if(k==='plus'&&state.isMigration)hints.push('Migration detected. Consider upgrading to Advanced, or scope additional Expert Hours. Reach out to PS for sizing help.');
+if(state.hasTW&&state.twTier==='business')hints.push('TW Business/Premium implementations can be complex. If query volumes are large or unclear, reach out to PS for scoping support.');
+return hints;
+}
+
+function renderAddons(){
+var k=state.pkg;var isEssentials=k==='essentials';var isElite=k==='elite';
+document.getElementById('addon-essentials-warning').classList.toggle('hide',!isEssentials);
+document.getElementById('addon-ses-included').classList.toggle('hide',!isElite);
+if(isEssentials){document.getElementById('addon-list').innerHTML='';return;}
+var hints=buildHints();var html='';
+for(var i=0;i<hints.length;i++){html+='<div class="hint-box">'+hints[i]+'</div>';}
+var hrsVal=state.expertHrs||0;
+var hrsTotal=hrsVal>0?'$'+(hrsVal*450).toLocaleString():'--';
+html+='<div class="addon-row"><div class="addon-info">';
+html+='<div class="addon-name">Expert Hours<span class="sku-chip">PS_EXPERT_HRS</span></div>';
+html+='<div class="addon-desc">Flexible hours for technical configuration, platform setup, end-user training, data analysis, social strategy, migration architecture, and more. $450/h.</div>';
+html+='<div class="hours-row"><label>Hours to include:</label>';
+html+='<input type="number" id="expert-hrs-input" min="0" step="1" value="'+hrsVal+'" style="width:80px" oninput="onExpertHrsChange(parseInt(this.value)||0)">';
+html+='<span class="hours-total" id="hrs-total-display">'+hrsTotal+'</span></div>';
+html+='<div class="warn-hours" id="warn-hrs">More than 5 hours on a '+PKGS[k].name+' package needs to be validated with PS leadership before including this.</div>';
+html+='</div></div>';
+if(state.isMigration||state.isGlobal){html+='<div class="reach-out-box">Migration or global rollout detected. Hour volumes can vary significantly. Reach out to PS before finalising scope.</div>';}
+if(!isElite){
+var sesVal=state.sesQty||0;
+var sesTotal=sesVal>0?'$'+(sesVal*20000).toLocaleString():'--';
+html+='<div class="addon-row"><div class="addon-info">';
+html+='<div class="addon-name">Strategic Engagement Services<span class="sku-chip">PS_SES</span></div>';
+html+='<div class="addon-desc">Dedicated Engagement Manager for project management, stakeholder coordination, and ADKAR-based change management. $20K per 3-month block.</div>';
+html+='<div class="hours-row"><label>Blocks (3 months each):</label>';
+html+='<input type="number" id="ses-qty-input" min="0" max="4" step="1" value="'+sesVal+'" style="width:60px" oninput="onSesChange(parseInt(this.value)||0)">';
+html+='<span class="hours-total" id="ses-total-display">'+sesTotal+'</span></div>';
+html+='<div class="addon-note">1 block = 3 months of Engagement Manager support (max 4 blocks = 12 months).</div>';
+html+='<div class="warn-hours" id="warn-ses">Adding SES to a Plus deal needs to be validated with PS leadership before including this.</div>';
+html+='</div></div>';
+}
+document.getElementById('addon-list').innerHTML=html;
+onExpertHrsChange(hrsVal,true);
+onSesChange(state.sesQty||0,true);
+}
+
+function onExpertHrsChange(v,silent){
+state.expertHrs=v;
+var disp=document.getElementById('hrs-total-display');if(disp)disp.textContent=v>0?'$'+(v*450).toLocaleString():'--';
+if(warnTimer)clearTimeout(warnTimer);
+warnTimer=setTimeout(function(){var warn=document.getElementById('warn-hrs');if(warn){var threshold=(state.pkg==='plus')?5:50;warn.style.display=(v>threshold)?'block':'none';}},300);
+if(!silent)saveState();
+}
+function onSesChange(v,silent){
+state.sesQty=v;
+var disp=document.getElementById('ses-total-display');if(disp)disp.textContent=v>0?'$'+(v*20000).toLocaleString():'--';
+var warn=document.getElementById('warn-ses');
+if(warn)warn.style.display=(state.pkg==='plus'&&v>0)?'block':'none';
+if(!silent)saveState();
+}
+
+function updateMultiYear(y){
+state.contractYears=parseInt(y)||1;
+document.getElementById('sum-years').value=y;
+var basePrice=calcPrice(state.pkg);
+var recurring=Math.round(basePrice)*state.contractYears;
+var oneTime=0;
+if(state.expertHrs>0)oneTime+=state.expertHrs*450;
+if(state.sesQty>0&&state.pkg!=='elite')oneTime+=state.sesQty*20000;
+var total=recurring+oneTime;
+document.getElementById('total-year-label').textContent=state.contractYears>1?('('+state.contractYears+'-year total)'):'(Year 1)';
+var note='';
+if(state.contractYears>1){note='Package fee x '+state.contractYears+' years ($'+recurring.toLocaleString()+')';if(oneTime>0)note+=' plus one-time add-ons ($'+oneTime.toLocaleString()+')';}
+document.getElementById('multi-year-note').textContent=note;
+document.getElementById('total-price-display').textContent='$'+total.toLocaleString();
+saveState();
+}
+
+function updateValidationUI(){
+var needsValidation=(state.pkg==='plus'&&(state.expertHrs>5||state.sesQty>0));
+var note=document.getElementById('ps-validation-note');
+var chk=document.getElementById('ps-alert-check');
+if(!note||!chk)return;
+if(needsValidation){note.style.display='inline';chk.checked=true;chk.disabled=true;}
+else{note.style.display='none';chk.disabled=false;}
+}
+
+function renderSummary(){
+var k=state.pkg;var p=PKGS[k];var basePrice=calcPrice(k);var isElite=k==='elite';
+document.getElementById('ph-title').textContent=(state.clientName||'Client')+' - Services Proposal';
+var sub=[];if(state.oppName)sub.push(state.oppName);sub.push(p.name+' package');
+document.getElementById('ph-sub').textContent=sub.join('  -  ');
+document.getElementById('sum-pkg-name').textContent=p.name+' Package';
+document.getElementById('sum-sku').innerHTML='SKU: <span class="sku-chip">'+p.sku+'</span>';
+document.getElementById('sum-base-price').textContent='$'+Math.round(basePrice).toLocaleString();
+renderDeliverables(k);
+document.getElementById('sum-deliverables').innerHTML=document.getElementById('deliverables-content').innerHTML;
+var addonsHtml='';
+if(isElite)addonsHtml+='<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between"><span>Strategic Engagement Services <span class="sku-chip">PS_SES</span></span><span style="color:#012B3A;font-weight:500">Included</span></div>';
+if(state.expertHrs>0)addonsHtml+='<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))"><span>Expert Hours '+state.expertHrs+'h <span class="sku-chip">PS_EXPERT_HRS</span></span><span style="color:#FF4C46;font-weight:500">$'+(state.expertHrs*450).toLocaleString()+'</span></div>';
+if(!isElite&&state.sesQty>0)addonsHtml+='<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))"><span>SES '+state.sesQty+' block(s) <span class="sku-chip">PS_SES</span></span><span style="color:#FF4C46;font-weight:500">$'+(state.sesQty*20000).toLocaleString()+'</span></div>';
+if(!addonsHtml)addonsHtml='<div class="muted" style="padding:8px 0;font-size:13px">No add-ons selected.</div>';
+document.getElementById('sum-addons-content').innerHTML=addonsHtml;
+var pctAmt=state.arr*p.pct;var bHtml='';
+if(p.pct>0){
+bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>'+p.name+' flat minimum</span><span>$'+p.flat.toLocaleString()+'</span></div>';
+bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>'+(p.pct*100).toFixed(0)+'% of tech ARR ($'+Math.round(state.arr).toLocaleString()+')</span><span>$'+Math.round(pctAmt).toLocaleString()+'</span></div>';
+bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:var(--color-text-secondary,#666)"><span>Package price (greater of above)</span><span>$'+Math.round(basePrice).toLocaleString()+'</span></div>';
+}else{
+bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>Essentials flat fee</span><span>$'+p.flat.toLocaleString()+'</span></div>';
+}
+document.getElementById('price-breakdown').innerHTML=bHtml;
+document.getElementById('sum-years').value=state.contractYears;
+updateMultiYear(state.contractYears);
+renderGantt();
+updateValidationUI();
+}
+
+function getTimelineConfig(){
+var k=state.pkg;var hs=state.hsProducts;var hasTW=state.hasTW;
+var hasInbox=hs.inbox.on,hasAnalytics=hs.analytics.on,hasListening=hs.listening.on,hasAmplify=hs.amplify.on;
+var hasAnyHS=hs.hse.on||hasInbox||hasAnalytics||hasListening||hasAmplify;
+var isEliteAdv=k==='elite'||k==='advanced';
+if(!hasAnyHS&&hasTW){
+return{cols:10,colLabels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10+'],rows:[
+{section:'Joint',label:'Kickoff call',owner:'',bars:[{col:0,span:1,type:'joint'}]},
+{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:9,type:'ongoing'}]},
+{section:'Client',label:'Requirements review session',owner:'Client',bars:[{col:1,span:2,type:'client'}]},
+{section:'Client',label:'Connect social tokens',owner:'Client',bars:[{col:1,span:1,type:'client'}]},
+{section:'Hootsuite',label:'TW launch configuration',owner:'Hootsuite',bars:[{col:2,span:3,type:'hs'}]},
+{section:'Training',label:'Data analysis webinar',owner:'Training',bars:[{col:3,span:1,type:'training'}]},
+{section:'Training',label:'Data customization session',owner:'Training',bars:[{col:4,span:1,type:'training'}]},
+{section:'Training',label:'Admin training',owner:'Training',bars:[{col:5,span:1,type:'training'}]},
+{section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:5,span:1,type:'joint'}]},
+{section:'Hootsuite',label:'Advanced features config',owner:'Hootsuite',bars:[{col:6,span:2,type:'hs'}]},
+{section:'Hootsuite',label:'Optimization',owner:'Hootsuite',bars:[{col:7,span:2,type:'hs'}]}
+]};
+}
+if(hasAnyHS&&!hasTW&&(k==='essentials'||k==='plus')){
+var rows=[{section:'Joint',label:'Kickoff',owner:'',bars:[{col:0,span:1,type:'joint'}]},{section:'Client',label:'Connect social accounts',owner:'Client',bars:[{col:0,span:1,type:'client'}]},{section:'Client',label:'HSE requirements gathering',owner:'Client',bars:[{col:0,span:2,type:'client'}]},{section:'Hootsuite',label:'Configure users and permissions',owner:'Hootsuite',bars:[{col:1,span:2,type:'hs'}]}];
+if(hasAnalytics)rows.push({section:'Hootsuite',label:'Analytics configuration',owner:'Hootsuite',bars:[{col:1,span:2,type:'hs'}]});
+if(hasListening)rows.push({section:'Hootsuite',label:'Listening configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+if(hasInbox)rows.push({section:'Hootsuite',label:'Inbox configuration',owner:'Hootsuite',bars:[{col:1,span:2,type:'hs'}]});
+rows.push({section:'Training',label:'HSE admin training',owner:'Training',bars:[{col:1,span:1,type:'training'}]});
+if(hasAnalytics)rows.push({section:'Training',label:'Analytics admin training',owner:'Training',bars:[{col:2,span:1,type:'training'}]});
+rows.push({section:'Training',label:'End-user enablement (digital)',owner:'Training',bars:[{col:3,span:2,type:'training'}]});
+rows.push({section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:3,span:1,type:'joint'}]});
+rows.push({section:'Ongoing',label:'Comms plan and feedback collection',owner:'',bars:[{col:4,span:3,type:'ongoing'}]});
+return{cols:7,colLabels:['W1','W2','W3','W4','Month 2','Month 3','Ongoing'],rows:rows};
+}
+if(hasAnyHS&&!hasTW&&isEliteAdv){
+var rows=[{section:'Joint',label:'Kickoff',owner:'',bars:[{col:0,span:1,type:'joint'}]},{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:9,type:'ongoing'}]},{section:'Client',label:'Requirements gathering',owner:'Client',bars:[{col:0,span:2,type:'client'}]},{section:'Client',label:'Connect social accounts',owner:'Client',bars:[{col:0,span:1,type:'client'}]},{section:'Hootsuite',label:'Configure users and permissions',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]}];
+if(hasAnalytics)rows.push({section:'Hootsuite',label:'Analytics configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+if(hasListening)rows.push({section:'Hootsuite',label:'Listening configuration',owner:'Hootsuite',bars:[{col:2,span:3,type:'hs'}]});
+if(hasInbox)rows.push({section:'Hootsuite',label:'Inbox configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+if(hasAmplify)rows.push({section:'Hootsuite',label:'Amplify strategy plus user config',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]});
+rows.push({section:'Training',label:'HSE admin training',owner:'Training',bars:[{col:1,span:1,type:'training'}]});
+if(hasAnalytics)rows.push({section:'Training',label:'Analytics admin training',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
+if(hasInbox)rows.push({section:'Training',label:'Inbox admin training',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
+if(hasListening)rows.push({section:'Training',label:'Listening admin training',owner:'Training',bars:[{col:4,span:1,type:'training'}]});
+rows.push({section:'Training',label:'End-user training (live sessions)',owner:'Training',bars:[{col:4,span:2,type:'training'}]});
+rows.push({section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:5,span:2,type:'joint'}]});
+rows.push({section:'Ongoing',label:'Office hours and feedback',owner:'',bars:[{col:7,span:3,type:'ongoing'}]});
+return{cols:10,colLabels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10+'],rows:rows};
+}
+if(hasAnyHS&&hasTW&&(k==='plus'||k==='advanced')){
+var rows=[{section:'Joint',label:'Kickoff',owner:'',bars:[{col:0,span:1,type:'joint'}]},{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:11,type:'ongoing'}]},{section:'Client',label:'Connect social accounts',owner:'Client',bars:[{col:0,span:1,type:'client'}]},{section:'Client',label:'HSE requirements gathering',owner:'Client',bars:[{col:0,span:2,type:'client'}]},{section:'Client',label:'TW requirements review session',owner:'Client',bars:[{col:1,span:2,type:'client'}]},{section:'Hootsuite',label:'Configure users and permissions',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]}];
+if(hasAnalytics)rows.push({section:'Hootsuite',label:'Analytics configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+if(hasInbox)rows.push({section:'Hootsuite',label:'Inbox configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+if(hasListening)rows.push({section:'Hootsuite',label:'Listening configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+rows.push({section:'Hootsuite',label:'TW launch configuration',owner:'Hootsuite',bars:[{col:2,span:3,type:'hs'}]});
+rows.push({section:'Training',label:'HSE admin training',owner:'Training',bars:[{col:1,span:1,type:'training'}]});
+if(hasAnalytics)rows.push({section:'Training',label:'Analytics training',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
+rows.push({section:'Training',label:'TW data analysis webinar',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
+rows.push({section:'Training',label:'TW data customization session',owner:'Training',bars:[{col:4,span:1,type:'training'}]});
+rows.push({section:'Training',label:'TW admin training sessions',owner:'Training',bars:[{col:5,span:1,type:'training'}]});
+rows.push({section:'Training',label:'End-user training',owner:'Training',bars:[{col:5,span:2,type:'training'}]});
+rows.push({section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:6,span:2,type:'joint'}]});
+rows.push({section:'Ongoing',label:'Office hours and feedback',owner:'',bars:[{col:9,span:3,type:'ongoing'}]});
+return{cols:12,colLabels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12+'],rows:rows};
+}
+return{cols:8,colLabels:['Month 1','Month 2','Month 3','Month 4','Month 5','Month 6','Month 7','Ongoing'],rows:[
+{section:'Joint',label:'Kickoff and accounts provisioned',owner:'',bars:[{col:0,span:1,type:'joint'}]},
+{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:7,type:'ongoing'}]},
+{section:'Phase 1 Planning',label:'Stakeholder and scope alignment',owner:'Client + EM',bars:[{col:0,span:2,type:'client'}]},
+{section:'Phase 1 Planning',label:'Requirements gathering',owner:'Client + TAM',bars:[{col:0,span:2,type:'client'}]},
+{section:'Phase 1 Planning',label:'Training roadmap',owner:'Training Lead',bars:[{col:0,span:2,type:'hs'}]},
+{section:'Phase 2/3 Setup and Launch',label:'Teams, permissions and config',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]},
+{section:'Phase 2/3 Setup and Launch',label:'TW launch configuration',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]},
+{section:'Phase 2/3 Setup and Launch',label:'Tailored admin enablement',owner:'Training',bars:[{col:2,span:1,type:'training'}]},
+{section:'Phase 2/3 Setup and Launch',label:'Role-based end-user training',owner:'Training',bars:[{col:2,span:3,type:'training'}]},
+{section:'Phase 2/3 Setup and Launch',label:'Launch parties and office hours',owner:'Joint',bars:[{col:3,span:2,type:'joint'}]},
+{section:'Phase 4 Monitor',label:'Feedback collection and optimization',owner:'Joint',bars:[{col:4,span:2,type:'joint'}]},
+{section:'Phase 4 Monitor',label:'Reinforcement strategies',owner:'Hootsuite',bars:[{col:4,span:2,type:'hs'}]},
+{section:'Phase 5 BAU',label:'Ongoing expert hours and optimization',owner:'',bars:[{col:6,span:2,type:'ongoing'}]}
+]};
+}
+
+function renderGantt(){
+var cfg=getTimelineConfig();var cols=cfg.cols;var colLabels=cfg.colLabels;var rows=cfg.rows;
+var labelW=170;var cellW=Math.max(42,Math.floor((660-labelW)/cols));var totalW=labelW+cols*cellW;
+var gridCols=labelW+'px repeat('+cols+','+cellW+'px)';
+var html='<div style="min-width:'+totalW+'px">';
+html+='<div style="display:grid;grid-template-columns:'+gridCols+';background:#012B3A;border-radius:8px 8px 0 0"><div class="gantt-header-label">Activity</div>';
+for(var c=0;c<colLabels.length;c++){html+='<div class="gantt-header-cell">'+colLabels[c]+'</div>';}
+html+='</div>';
+var lastSection='';
+for(var r=0;r<rows.length;r++){
+var row=rows[r];
+if(row.section!==lastSection){html+='<div style="display:grid;grid-template-columns:'+gridCols+'"><div class="gantt-section" style="grid-column:1/-1">'+row.section+'</div></div>';lastSection=row.section;}
+html+='<div class="gantt-row" style="display:grid;grid-template-columns:'+gridCols+'"><div class="gantt-row-label">'+row.label+(row.owner?'<span class="owner">'+row.owner+'</span>':'')+'</div>';
+var col=0;
+while(col<cols){
+var bar=null;
+for(var bi=0;bi<row.bars.length;bi++){if(row.bars[bi].col===col){bar=row.bars[bi];break;}}
+if(bar){var span=Math.min(bar.span,cols-col);html+='<div class="gantt-cell" style="grid-column:span '+span+'"><div class="gantt-bar bar-'+bar.type+'"></div></div>';col+=span;}
+else{html+='<div class="gantt-cell"></div>';col++;}
+}
+html+='</div>';
+}
+html+='<div class="gantt-footer">Graduation - handover to AM/CSM</div></div>';
+document.getElementById('gantt-container').innerHTML=html;
+document.getElementById('gantt-legend').innerHTML='<div class="gantt-legend-item"><div class="gantt-legend-dot bar-hs"></div>Hootsuite action</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-client"></div>Client action</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-joint"></div>Joint accountability</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-training"></div>Training session</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-ongoing"></div>Ongoing</div>';
+}
+
+function downloadPPTX(){
+if(typeof PptxGenJS==='undefined'){alert('PPTX library still loading. Please try again.');return;}
+var btn=document.getElementById('pptx-btn');var orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='Generating...';
+setTimeout(function(){
+try{buildPPTX();}catch(e){alert('Could not generate PPTX. Please try again.');}
+btn.disabled=false;btn.innerHTML=orig;
+},50);
+}
+
+function buildPPTX(){
+var pptx=new PptxGenJS();
+var cfg=getTimelineConfig();var cols=cfg.cols;var colLabels=cfg.colLabels;var rows=cfg.rows;
+var p=PKGS[state.pkg];var basePrice=calcPrice(state.pkg);
+var BAR={hs:'FF4C46',client:'012B3A',joint:'7ec8a0',training:'f0a500',ongoing:'cce5ff'};
+var s1=pptx.addSlide();
+s1.background={color:'012B3A'};
+s1.addText((state.clientName||'Client')+' - Services Proposal',{x:0.6,y:2.2,w:8.8,h:0.8,color:'FFFFFF',fontSize:30,bold:true,fontFace:'Arial'});
+var subline=p.name+' package';if(state.oppName)subline=state.oppName+'  -  '+subline;
+s1.addText(subline,{x:0.6,y:3.1,w:8.8,h:0.4,color:'DFFFDE',fontSize:16,fontFace:'Arial'});
+s1.addText('Prepared with the Professional Services Scoping Calculator',{x:0.6,y:6.6,w:8.8,h:0.3,color:'888888',fontSize:10,fontFace:'Arial'});
+var s2=pptx.addSlide();
+s2.addShape(pptx.ShapeType.rect,{x:0,y:0,w:'100%',h:0.65,fill:{color:'012B3A'}});
+s2.addText('Scope and pricing',{x:0.2,y:0.12,w:9,h:0.4,color:'FFFFFF',fontSize:16,bold:true,fontFace:'Arial'});
+var rowsTxt=[];
+rowsTxt.push([{text:p.name+' package ('+p.sku+')',options:{bold:true}},{text:'$'+Math.round(basePrice).toLocaleString(),options:{align:'right',bold:true}}]);
+if(state.pkg==='elite')rowsTxt.push([{text:'Strategic Engagement Services (PS_SES)'},{text:'Included',options:{align:'right'}}]);
+if(state.expertHrs>0)rowsTxt.push([{text:'Expert Hours - '+state.expertHrs+'h (PS_EXPERT_HRS)'},{text:'$'+(state.expertHrs*450).toLocaleString(),options:{align:'right'}}]);
+if(state.sesQty>0&&state.pkg!=='elite')rowsTxt.push([{text:'SES - '+state.sesQty+' block(s) (PS_SES)'},{text:'$'+(state.sesQty*20000).toLocaleString(),options:{align:'right'}}]);
+var oneTime=(state.expertHrs>0?state.expertHrs*450:0)+((state.sesQty>0&&state.pkg!=='elite')?state.sesQty*20000:0);
+var total=Math.round(basePrice)*state.contractYears+oneTime;
+rowsTxt.push([{text:'Estimated total ('+state.contractYears+'-year)',options:{bold:true,color:'FF4C46'}},{text:'$'+total.toLocaleString(),options:{align:'right',bold:true,color:'FF4C46'}}]);
+s2.addTable(rowsTxt,{x:0.4,y:1.0,w:9.2,colW:[6.8,2.4],fontSize:11,fontFace:'Arial',border:{type:'solid',color:'E8E8E8',pt:0.5},rowH:0.35});
+var deliv=DELIVERABLES[state.pkg].onboarding;
+var dtext='Key deliverables: ';for(var di=0;di<deliv.length;di++){dtext+=deliv[di];if(di<deliv.length-1)dtext+=';  ';}
+s2.addText(dtext,{x:0.4,y:1.1+rowsTxt.length*0.38+0.3,w:9.2,h:1.5,color:'444444',fontSize:10,fontFace:'Arial',valign:'top'});
+var s3=pptx.addSlide();
+s3.addShape(pptx.ShapeType.rect,{x:0,y:0,w:'100%',h:0.65,fill:{color:'012B3A'}});
+s3.addText((state.clientName?state.clientName+' - ':'')+'Implementation Timeline',{x:0.2,y:0.1,w:9.2,h:0.45,color:'FFFFFF',fontSize:16,bold:true,fontFace:'Arial'});
+s3.addText('Timeline depends on client turnaround and scheduling',{x:0.2,y:0.68,w:9,h:0.2,color:'888888',fontSize:8,fontFace:'Arial',italic:true});
+var legendItems=[['FF4C46','Hootsuite'],['012B3A','Client'],['7ec8a0','Joint'],['f0a500','Training'],['cce5ff','Ongoing']];
+for(var li=0;li<legendItems.length;li++){s3.addShape(pptx.ShapeType.rect,{x:0.2+li*1.8,y:6.6,w:0.12,h:0.12,fill:{color:legendItems[li][0]}});s3.addText(legendItems[li][1],{x:0.36+li*1.8,y:6.58,w:1.4,h:0.18,fontSize:7,color:'444444',fontFace:'Arial'});}
+var gx=0.2,gy=1.0,tw=9.6,lw=1.9;var cw=(tw-lw)/cols;var rh=0.24;
+s3.addShape(pptx.ShapeType.rect,{x:gx,y:gy,w:tw,h:0.28,fill:{color:'012B3A'}});
+s3.addText('Activity',{x:gx+0.05,y:gy+0.03,w:lw,h:0.22,color:'DFFFDE',fontSize:7,bold:true,fontFace:'Arial'});
+for(var cl=0;cl<colLabels.length;cl++){s3.addText(colLabels[cl],{x:gx+lw+cl*cw,y:gy+0.03,w:cw,h:0.22,color:'DFFFDE',fontSize:6,bold:true,fontFace:'Arial',align:'center'});}
+var yo=gy+0.3;var lastSec='';
+for(var rr=0;rr<rows.length;rr++){
+var row=rows[rr];
+if(row.section!==lastSec){s3.addShape(pptx.ShapeType.rect,{x:gx,y:yo,w:tw,h:0.16,fill:{color:'F0F0F0'}});s3.addText(row.section.toUpperCase(),{x:gx+0.05,y:yo,w:tw,h:0.16,color:'888888',fontSize:5.5,bold:true,fontFace:'Arial'});yo+=0.16;lastSec=row.section;}
+s3.addText(row.label+(row.owner?' ('+row.owner+')':''),{x:gx,y:yo+0.02,w:lw-0.05,h:rh-0.04,color:'333333',fontSize:6,fontFace:'Arial',wrap:true});
+for(var bb=0;bb<row.bars.length;bb++){var b=row.bars[bb];var span=Math.min(b.span,cols-b.col);s3.addShape(pptx.ShapeType.rect,{x:gx+lw+b.col*cw+0.02,y:yo+0.04,w:span*cw-0.04,h:rh-0.1,fill:{color:BAR[b.type]||'CCCCCC'},line:{color:BAR[b.type]||'CCCCCC',width:0}});}
+yo+=rh;
+}
+s3.addShape(pptx.ShapeType.rect,{x:gx,y:yo,w:tw,h:0.24,fill:{color:'FFF0F0'},line:{color:'FF4C46',width:1}});
+s3.addText('Graduation - handover to AM/CSM',{x:gx+0.1,y:yo+0.03,w:tw,h:0.18,color:'FF4C46',fontSize:8,bold:true,fontFace:'Arial'});
+var fname=(state.clientName||'Hootsuite')+'_Services_Proposal_'+p.name;
+pptx.writeFile({fileName:fname+'.pptx'});
+}
+
+function downloadPDF(){
+var btn=document.getElementById('pdf-btn');var orig=btn.innerHTML;
+if(typeof html2canvas==='undefined'||typeof window.jspdf==='undefined'){window.print();return;}
+btn.disabled=true;btn.innerHTML='Generating...';
+var card=document.getElementById('proposal-card');
+html2canvas(card,{scale:2,backgroundColor:'#ffffff',useCORS:true}).then(function(canvas){
+var imgData=canvas.toDataURL('image/png');
+var jsPDF=window.jspdf.jsPDF;
+var pdf=new jsPDF('p','pt','a4');
+var pw=pdf.internal.pageSize.getWidth();
+var ph=pdf.internal.pageSize.getHeight();
+var imgW=pw-40;var imgH=canvas.height*imgW/canvas.width;
+if(imgH<=ph-40){pdf.addImage(imgData,'PNG',20,20,imgW,imgH);}
+else{
+var pageContentH=ph-40;var srcY=0;var pageNum=0;
+while(srcY<canvas.height){
+var sliceH=Math.min(canvas.height-srcY,canvas.width*(pageContentH)/imgW);
+var tmp=document.createElement('canvas');tmp.width=canvas.width;tmp.height=sliceH;
+tmp.getContext('2d').drawImage(canvas,0,srcY,canvas.width,sliceH,0,0,canvas.width,sliceH);
+if(pageNum>0)pdf.addPage();
+pdf.addImage(tmp.toDataURL('image/png'),'PNG',20,20,imgW,sliceH*imgW/canvas.width);
+srcY+=sliceH;pageNum++;
+}
+}
+var fname=(state.clientName||'Hootsuite')+'_Services_Proposal_'+PKGS[state.pkg].name;
+pdf.save(fname+'.pdf');
+btn.disabled=false;btn.innerHTML=orig;
+}).catch(function(){btn.disabled=false;btn.innerHTML=orig;window.print();});
+}
+
+function copyShareLink(){
+var btn=document.getElementById('share-btn');var orig=btn.innerHTML;
+try{
+var encoded=encodeURIComponent(btoa(JSON.stringify(state)));
+var url=location.href.split('#')[0]+'#q='+encoded;
+navigator.clipboard.writeText(url).then(function(){btn.innerHTML='<i class="ti ti-check"></i> Link copied';setTimeout(function(){btn.innerHTML=orig;},2000);},function(){prompt('Copy this link:',url);});
+}catch(e){alert('Could not generate share link.');}
+}
+
+function loadFromHash(){
+if(location.hash.indexOf('#q=')!==0)return false;
+try{
+var encoded=location.hash.substring(3);
+var decoded=JSON.parse(atob(decodeURIComponent(encoded)));
+state=decoded;
+state.completedSteps=[1,2,3];
+restoreFormFromState();
+return true;
+}catch(e){return false;}
+}
+
+function resetAll(){
+state={clientName:'',oppName:'',region:'',arr:0,contractYears:1,hsProducts:{hse:{on:false,unknown:false},inbox:{on:false},analytics:{on:false,unknown:false},listening:{on:false,unknown:false},amplify:{on:false,unknown:false}},hasTW:false,twTier:'analyze',isMigration:false,isGlobal:false,pkg:'',lastRec:'',expertHrs:0,sesQty:0,completedSteps:[]};
+try{sessionStorage.removeItem('ps_calc_state');}catch(e){}
+if(location.hash)location.hash='';
+document.getElementById('client-name').value='';document.getElementById('opp-name').value='';document.getElementById('region').value='';document.getElementById('arr-input').value='';
+var ids=['hse','inbox','analytics','listening','amplify'];
+for(var i=0;i<ids.length;i++){document.getElementById('chk-'+ids[i]).checked=false;document.getElementById('prod-'+ids[i]).classList.remove('active');document.getElementById(ids[i]+'-summary').textContent='';var dk=document.getElementById('dk-'+ids[i]);if(dk)dk.checked=false;}
+document.getElementById('has-tw').checked=false;document.getElementById('tw-tier-row').classList.add('hide');
+document.getElementById('is-migration').checked=false;document.getElementById('is-global').checked=false;
+var steps=[1,2,3,4];for(var s=0;s<steps.length;s++){var snum=document.getElementById('snum-'+steps[s]);if(snum)snum.innerHTML=steps[s];document.getElementById('nav-'+steps[s]).classList.remove('active','done');}
+goStep(1);
+}
+
+if(loadFromHash()){goStep(4);}else{loadState();updateProgress(1);}
+</script>
+</body>
+</html>
