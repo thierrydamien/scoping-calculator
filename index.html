@@ -379,11 +379,8 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 <div id="ps-required-banner" class="no-print" style="display:none;margin-top:12px;padding:12px 14px;background:#fff5f5;border:1px solid #FF4C46;border-radius:8px;color:#012B3A;font-size:13px;line-height:1.5"></div>
 <div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap" class="no-print">
   <button class="btn btn-primary" id="sendps-btn" onclick="sendToPS()"><i class="ti ti-send" aria-hidden="true"></i> Send to PS</button>
-  <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--color-text-secondary,#666);cursor:pointer">
-    <input type="checkbox" id="ps-alert-check" style="accent-color:#FF4C46;width:14px;height:14px">
-    Flag for PS review on Slack
-  </label>
-  <span id="ps-validation-note" style="font-size:12px;color:#FF4C46;display:none"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Validation required, Slack alert will fire automatically</span>
+  <input type="hidden" id="ps-alert-check">
+  <span id="ps-validation-note" style="font-size:12px;color:#FF4C46;display:none"><i class="ti ti-alert-triangle" aria-hidden="true"></i> PS will be notified on Slack automatically</span>
 </div>
 <div style="margin-top:8px" class="no-print" id="ps-notes-wrap">
   <label class="field-label" for="ps-notes" style="margin-bottom:4px">Note to PS <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional, included in the alert)</span></label>
@@ -1516,7 +1513,7 @@ function actualSend(flagged,alertRequested,validationReason,notes){
       if(data&&data.ok){
         state.lastSubmissionId=submissionId;saveState();
         btn.innerHTML='<i class="ti ti-check"></i> Sent to PS';
-        if(res){res.style.display='block';res.style.color='#0f5a3a';res.innerHTML='Recorded by PS. Reference '+esc(submissionId)+'.'+((flagged||alertRequested)?' A Slack alert was sent to PS'+(flagged&&!alertRequested?' (auto-flagged for validation)':'')+'.':'')+' If you change and resend this scope, it will be linked as a revision.';}
+        if(res){res.style.display='block';res.style.color='#0f5a3a';res.innerHTML='Recorded by PS. Reference '+esc(submissionId)+'.'+(flagged?' PS was notified on Slack.':'')+' If you change and resend this scope, it will be linked as a revision.';}
       }else{throw new Error('rejected');}
       setTimeout(function(){btn.disabled=false;btn.innerHTML=orig;},2500);
     })
