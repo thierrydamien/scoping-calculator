@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PS Scoping Calculator</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -15,10 +17,11 @@ body{font-family:Arial,sans-serif;background:var(--color-background-tertiary,#f5
 .top-bar-right a{font-size:12px;color:#DFFFDE;font-weight:500;text-decoration:none;cursor:pointer}
 .top-bar-right a:hover{text-decoration:underline}
 .step-nav{display:flex;align-items:center;background:var(--color-background-primary,#fff);padding:0 1.5rem;overflow-x:auto}
-.step-item{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:13px;color:var(--color-text-tertiary,#999);white-space:nowrap;flex-shrink:0;cursor:pointer}
+.step-item{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:13px;color:var(--color-text-tertiary,#999);white-space:nowrap;flex-shrink:0;cursor:pointer;background:none;border:none;font-family:inherit}
 .step-item.active{color:#FF4C46;font-weight:500}
 .step-item.done{color:var(--color-text-secondary,#666)}
 .step-item.done:hover{color:#FF4C46}
+.step-item:focus-visible{outline:2px solid #FF4C46;outline-offset:2px;border-radius:6px}
 .step-num{width:20px;height:20px;border-radius:50%;background:transparent;border:1.5px solid var(--color-border-secondary,rgba(0,0,0,0.2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;color:var(--color-text-tertiary,#999)}
 .step-item.active .step-num{background:transparent;border:2px solid #FF4C46;color:#FF4C46}
 .step-item.done .step-num{background:#012B3A;border-color:#012B3A;color:#fff}
@@ -33,8 +36,8 @@ h2{font-size:16px;font-weight:500;margin-bottom:4px}
 .section-divider{border:none;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.1));margin:1.25rem 0}
 .subsection-title{font-size:13px;font-weight:500;color:var(--color-text-secondary,#666);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
 label.field-label{display:block;font-size:13px;color:var(--color-text-secondary,#666);margin-bottom:6px;font-weight:500}
-select,input[type=number],input[type=text]{width:100%;padding:8px 10px;border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.25));border-radius:8px;font-size:14px;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a);font-family:Arial,sans-serif}
-select:focus,input[type=number]:focus,input[type=text]:focus{outline:none;border-color:#FF4C46}
+select,input[type=number],input[type=text],input[type=url]{width:100%;padding:8px 10px;border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.25));border-radius:8px;font-size:14px;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a);font-family:Arial,sans-serif}
+select:focus,input:focus{outline:none;border-color:#FF4C46;box-shadow:0 0 0 2px rgba(255,76,70,0.15)}
 input.error{border-color:#FF4C46;background:#fff8f8}
 .field-error{font-size:12px;color:#FF4C46;margin-top:4px}
 .field-hint{font-size:11px;color:var(--color-text-tertiary,#999);margin-top:4px}
@@ -46,9 +49,17 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 .toggle input{opacity:0;width:0;height:0}
 .toggle-track{position:absolute;inset:0;background:var(--color-border-secondary,rgba(0,0,0,0.2));border-radius:11px;cursor:pointer;transition:background 0.2s}
 .toggle input:checked+.toggle-track{background:#FF4C46}
+.toggle input:focus-visible+.toggle-track{outline:2px solid #012B3A;outline-offset:2px}
 .toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform 0.2s;pointer-events:none}
 .toggle input:checked~.toggle-thumb{transform:translateX(18px)}
 .context-card{background:var(--color-background-secondary,#f8f8f8);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.1));border-radius:10px;padding:6px 14px;margin-top:4px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg-btn{flex:1;min-width:120px;padding:10px 12px;border:1.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;text-align:left}
+.seg-btn:hover{border-color:#FF4C46}
+.seg-btn.on{border-color:#FF4C46;background:#fff5f5}
+.seg-btn:focus-visible{outline:2px solid #012B3A;outline-offset:2px}
+.seg-btn .seg-title{font-weight:500;font-size:14px}
+.seg-btn .seg-sub{font-size:11px;color:var(--color-text-tertiary,#999);margin-top:2px;display:block}
 .hs-product{border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:10px;overflow:hidden;margin-bottom:8px}
 .hs-product-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--color-background-primary,#fff)}
 .hs-product-header:hover{background:var(--color-background-secondary,#f8f8f8)}
@@ -57,17 +68,20 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 .hs-product-body{padding:10px 14px;display:none;background:var(--color-background-secondary,#f8f8f8)}
 .hs-product.active .hs-product-body{display:block}
 .detail-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.detail-row+.detail-row{margin-top:8px}
 .detail-row label{font-size:13px;color:var(--color-text-secondary,#666);white-space:nowrap}
 .detail-row input[type=number]{width:90px}
 .dk-inline{display:flex;align-items:center;gap:5px}
 .dk-inline input[type=checkbox]{width:14px;height:14px;accent-color:#FF4C46;cursor:pointer}
 .dk-inline label{font-size:12px;color:var(--color-text-secondary,#666);cursor:pointer}
 .pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:8px}
-.pkg-card{border:1.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:10px;padding:12px;cursor:pointer;transition:all 0.15s;position:relative;background:var(--color-background-primary,#fff)}
-.pkg-card:hover:not([style*="pointer-events:none"]){border-color:#FF4C46}
+.pkg-card{border:1.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:10px;padding:12px;cursor:pointer;transition:all 0.15s;position:relative;background:var(--color-background-primary,#fff);font-family:inherit;text-align:left;width:100%}
+.pkg-card:hover:not(:disabled){border-color:#FF4C46}
 .pkg-card.selected{border-color:#FF4C46;background:#fff5f5}
 .pkg-card.recommended{border-color:#012B3A}
 .pkg-card.recommended.selected{border-color:#FF4C46;background:#fff5f5}
+.pkg-card:disabled{opacity:0.35;cursor:not-allowed}
+.pkg-card:focus-visible{outline:2px solid #012B3A;outline-offset:2px}
 .rec-badge{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#012B3A;color:#DFFFDE;font-size:10px;padding:2px 8px;border-radius:10px;white-space:nowrap}
 .pkg-name{font-size:14px;font-weight:500;margin-bottom:2px}
 .pkg-calc-price{font-size:16px;font-weight:500;color:#FF4C46;margin:4px 0 2px}
@@ -96,9 +110,15 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 .deliverables-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:520px){.deliverables-grid{grid-template-columns:1fr}.upgrade-grid{grid-template-columns:1fr}}
 .del-card{border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:8px;padding:10px 12px}
+.del-card.excl{background:var(--color-background-secondary,#fafafa)}
 .del-title{font-size:12px;font-weight:500;color:var(--color-text-secondary,#666);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
 .del-item{font-size:13px;padding:3px 0;display:flex;gap:6px;align-items:flex-start;line-height:1.4}
 .del-item::before{content:'';width:5px;height:5px;border-radius:50%;background:#FF4C46;flex-shrink:0;margin-top:5px}
+.del-item.excl-item{color:var(--color-text-secondary,#777)}
+.del-item.excl-item::before{content:'';width:8px;height:1.5px;border-radius:0;background:#c33;margin-top:8px}
+.del-card.addon{border-color:#7ec8a0;background:#f6fdf9}
+.del-item.add-item{color:#0f5a3a}
+.del-item.add-item::before{content:'+';background:transparent;color:#0f9d58;font-size:12px;line-height:1;width:auto;height:auto;margin-top:2px;font-weight:700}
 .addon-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 0}
 .addon-row+.addon-row{border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))}
 .addon-info{flex:1}
@@ -113,12 +133,22 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 .reach-out-box{background:#DFFFDE;border:0.5px solid #012B3A;border-radius:8px;padding:10px 12px;font-size:13px;color:#012B3A;margin-top:8px}
 .warning-box{background:#fff8e1;border:0.5px solid #f0c040;border-radius:8px;padding:10px 12px;font-size:13px;color:#7a5c00;margin-top:10px}
 .info-box{background:var(--color-background-secondary,#f8f8f8);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:8px;padding:10px 12px;font-size:13px;color:var(--color-text-secondary,#666);margin-top:10px}
+.beta-badge{display:inline-block;background:#012B3A;color:#DFFFDE;font-size:10px;padding:1px 7px;border-radius:8px;margin-left:6px;vertical-align:middle}
 .section-title{font-size:15px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .section-title i{color:#FF4C46}
 .total-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--color-border-tertiary,rgba(0,0,0,0.12));margin-top:4px}
 .total-label{font-size:14px;font-weight:500}
 .total-price{font-size:18px;font-weight:500;color:#FF4C46}
 .sku-chip{display:inline-block;background:var(--color-background-secondary,#f0f0f0);border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.2));border-radius:6px;padding:2px 8px;font-size:11px;font-family:monospace;margin-left:6px;color:var(--color-text-secondary,#666)}
+.est-box{border:1.5px solid #012B3A;border-radius:10px;padding:12px 14px;margin-bottom:12px;background:#fbfffb}
+.est-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.est-title{font-size:13px;font-weight:500;color:#012B3A;display:flex;align-items:center;gap:6px}
+.est-result{font-size:13px;font-weight:500;color:#012B3A;background:#DFFFDE;border-radius:6px;padding:3px 10px}
+.est-check{display:flex;align-items:flex-start;gap:8px;padding:7px 0;font-size:13px;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.06))}
+.est-check input{width:15px;height:15px;accent-color:#FF4C46;margin-top:1px;flex-shrink:0}
+.est-check .ec-label{line-height:1.35}
+.est-check .ec-h{color:var(--color-text-tertiary,#999);font-size:11px;margin-left:6px;white-space:nowrap}
+.est-apply{margin-top:10px}
 .proposal-header{background:#012B3A;border-radius:12px 12px 0 0;padding:14px 18px;margin:-1.25rem -1.25rem 1rem;color:#fff}
 .proposal-header .ph-title{font-size:17px;font-weight:500}
 .proposal-header .ph-sub{font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px}
@@ -126,6 +156,7 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 .btn{padding:9px 18px;border-radius:8px;border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.25));font-size:14px;cursor:pointer;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a);font-family:Arial,sans-serif}
 .btn:hover{background:var(--color-background-secondary,#f5f5f5)}
 .btn:disabled{opacity:0.6;cursor:wait}
+.btn:focus-visible{outline:2px solid #012B3A;outline-offset:2px}
 .btn-primary{background:#FF4C46;color:#fff;border-color:#FF4C46}
 .btn-primary:hover{background:#e03d37}
 .btn-outline-dark{border-color:#012B3A;color:#012B3A}
@@ -153,85 +184,131 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 .multi-year-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))}
 .multi-year-row label{font-size:13px;color:var(--color-text-secondary,#666);white-space:nowrap}
 .multi-year-row select{width:auto;min-width:120px}
-@media print{.top-bar,.step-nav,.progress-track,.progress-meta,.btn-row,#step-1,#step-2,#step-3{display:none!important}.container{max-width:100%;padding:0}.card{border:none;page-break-inside:avoid}}
+.lead-note{font-size:12px;color:var(--color-text-secondary,#666);margin-top:8px;background:var(--color-background-secondary,#f8f8f8);border-radius:8px;padding:8px 12px}
+@media print{.top-bar,.step-nav,.progress-track,.progress-meta,.btn-row,#step-1,#step-2,#step-3,.no-print{display:none!important}.container{max-width:100%;padding:0}.card{border:none;page-break-inside:avoid}}
+
+.hours-guide{background:#fbfffb;border:0.5px solid #012B3A;border-radius:6px;padding:8px 12px;margin:8px 0;font-size:12.5px;color:#012B3A;line-height:1.45}
+.hours-guide b{font-weight:500}
+.hours-guide-included{background:#fff9ea;border:0.5px solid #d8b26c;border-radius:6px;padding:6px 10px;margin:0 0 8px 0;font-size:12px;color:#6b4a10;line-height:1.4}
+.picker-collapse{margin-top:12px;border-top:0.5px solid rgba(0,0,0,0.08);padding-top:10px}
+.picker-header{font-family:Arial,sans-serif;background:transparent;border:none;color:#012B3A;font-size:12.5px;font-weight:500;cursor:pointer;padding:2px 0;text-align:left;width:100%}
+.picker-header:hover{color:#FF4C46}
+.picker-body{margin-top:10px}
+.picker-list{display:flex;flex-direction:column}
+.picker-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.05)}
+.picker-row:last-child{border-bottom:none}
+.picker-row-label{flex:1;min-width:0}
+.pr-title{display:block;font-size:12.5px;color:#012B3A}
+.pr-hint{display:block;font-size:11px;color:#888;margin-top:1px}
+.picker-row-input{flex-shrink:0;display:flex;align-items:center}
+.pr-qty{width:56px;padding:5px 8px;border:0.5px solid #ccc;border-radius:4px;font-family:Arial,sans-serif;font-size:13px;text-align:center}
+.picker-row-input input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#FF4C46}
+.picker-section-title{font-size:12.5px;font-weight:500;color:#012B3A;margin:14px 0 6px 0;padding-top:10px;border-top:0.5px dashed rgba(0,0,0,0.15);display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.picker-section-note{font-size:11px;font-weight:400;color:#888;font-style:italic}
+.picker-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding-top:10px;border-top:0.5px solid rgba(0,0,0,0.08);font-size:12.5px;color:#012B3A}
+.picker-footer button{font-size:11.5px;padding:5px 12px}
+.picker-footer button:disabled{opacity:0.4;cursor:not-allowed}
 </style>
 </head>
 <body>
 <div class="top-bar">
   <div class="top-bar-left">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#FF4C46"/><path d="M6 12h12M6 8h8M6 16h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
-    <h1>Professional Services Scoping Calculator <span style="font-weight:400;color:rgba(255,255,255,0.6);font-size:12px">(last updated June 11th)</span></h1>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#FF4C46"/><path d="M6 12h12M6 8h8M6 16h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <h1>Professional Services Scoping Calculator <span style="font-weight:400;color:rgba(255,255,255,0.6);font-size:12px" id="build-stamp"></span></h1>
   </div>
   <div class="top-bar-right">
     <div class="avatar">DT</div>
     <span>Questions or feedback?</span>
-    <a onclick="pingSlack()">Ping Damien Thierry</a>
+    <a onclick="pingSlack()" tabindex="0" role="button" onkeydown="if(event.key==='Enter')pingSlack()">Ping Damien Thierry</a>
   </div>
 </div>
 <div class="step-nav">
-  <div class="step-item active" id="nav-1" onclick="navToStep(1)"><span class="step-num" id="snum-1">1</span> Deal details</div>
-  <div class="step-item" id="nav-2" onclick="navToStep(2)"><span class="step-num" id="snum-2">2</span> Package</div>
-  <div class="step-item" id="nav-3" onclick="navToStep(3)"><span class="step-num" id="snum-3">3</span> Add-ons</div>
-  <div class="step-item" id="nav-4" onclick="navToStep(4)"><span class="step-num" id="snum-4">4</span> Summary</div>
+  <button class="step-item active" id="nav-1" onclick="navToStep(1)"><span class="step-num" id="snum-1">1</span> Deal details</button>
+  <button class="step-item" id="nav-2" onclick="navToStep(2)"><span class="step-num" id="snum-2">2</span> Package</button>
+  <button class="step-item" id="nav-3" onclick="navToStep(3)"><span class="step-num" id="snum-3">3</span> Add-ons</button>
+  <button class="step-item" id="nav-4" onclick="navToStep(4)"><span class="step-num" id="snum-4">4</span> Summary</button>
 </div>
 <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-<div class="progress-meta"><span id="progress-label">Step 1 of 4</span><span>About 2 min to complete</span></div>
+<div class="progress-meta"><span id="progress-label">Step 1 of 4</span><span>About 2 to 3 min to complete</span></div>
 <div class="container">
 
 <div id="step-1">
+<div class="card" style="margin-bottom:1rem">
+  <div class="section-title" style="margin-bottom:6px"><i class="ti ti-clipboard" aria-hidden="true"></i> Quick prefill from notes <span style="font-weight:400;color:var(--color-text-tertiary,#999);font-size:12px">(optional)</span></div>
+  <p class="muted" style="margin-bottom:10px">Paste a few lines of deal notes and we'll prefill what we can, ARR, region, obvious product names. It works best on a short note rather than a full email thread, since it's scanning for keywords, not reading for context. Review and fill in the rest before moving on.</p>
+  <textarea id="prefill-notes" rows="3" placeholder="e.g. Acme Corp, EMEA, ~80K ARR, Perch 60 seats, Advanced Analytics, Lumen Analyze" style="width:100%;padding:10px;border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.25));border-radius:8px;font-size:14px;font-family:Arial,sans-serif;resize:vertical"></textarea>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap">
+    <button type="button" class="btn btn-outline-dark" id="prefill-btn" onclick="quickPrefill()"><i class="ti ti-arrow-down" aria-hidden="true"></i> Prefill what I can</button>
+    <span id="prefill-status" style="font-size:13px;color:var(--color-text-secondary,#666)"></span>
+  </div>
+</div>
 <div class="card">
   <h2>Deal details</h2>
   <p class="muted" style="margin-bottom:1.25rem">Enter the opportunity information to determine the recommended package.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-    <div><label class="field-label">Client name</label><input type="text" id="client-name" placeholder="e.g. Acme Corp"></div>
-    <div><label class="field-label">Opportunity name <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional)</span></label><input type="text" id="opp-name" placeholder="e.g. Acme Corp FY26 Renewal"></div>
+    <div><label class="field-label" for="client-name">Client name</label><input type="text" id="client-name" placeholder="e.g. Acme Corp"><div class="field-error hide" id="client-error">Please enter the client name.</div></div>
+    <div><label class="field-label" for="opp-name">Opportunity name <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional)</span></label><input type="text" id="opp-name" placeholder="e.g. Acme Corp FY26 Renewal"></div>
   </div>
+  <div style="margin-bottom:14px"><label class="field-label" for="sfdc-url">Salesforce opportunity link or ID <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional)</span></label><input type="url" id="sfdc-url" placeholder="https://hootsuite.lightning.force.com/... or 006..."><div class="field-hint">Optional, but strongly recommended: links the scope to the opp so PS can join it to pipeline.</div></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div><label class="field-label">Region</label><select id="region"><option value="">Select region</option><option value="NA">North America (NA)</option><option value="LATAM">Latin America (LATAM)</option><option value="EMEA">EMEA</option><option value="APAC">APAC</option></select></div>
-    <div><label class="field-label">Total tech ARR (USD)</label><input type="number" id="arr-input" placeholder="e.g. 75000" min="0" step="1000"><div class="field-hint" id="arr-hint">ARR determines which packages are available.</div><div class="field-error hide" id="arr-error">Please enter the total tech ARR to continue.</div></div>
+    <div><label class="field-label" for="region">Region <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional)</span></label><select id="region"><option value="">Select region</option><option value="NA">North America (NA)</option><option value="LATAM">Latin America (LATAM)</option><option value="EMEA">EMEA</option><option value="APAC">APAC</option></select></div>
+    <div><label class="field-label" for="arr-input">Total tech ARR (USD)</label><input type="number" id="arr-input" placeholder="e.g. 75000" min="0" step="1000"><div class="field-hint" id="arr-hint">ARR determines which packages are available.</div><div class="field-error hide" id="arr-error">Please enter the total tech ARR to continue.</div></div>
+  </div>
+  <div style="margin-top:14px"><label class="field-label" for="delivery-lang">Delivery language</label><select id="delivery-lang" onchange="onLangChange()"><option value="English">English</option><option value="French">French</option><option value="Spanish">Spanish</option><option value="Portuguese">Portuguese</option><option value="German">German</option><option value="Other">Other / multiple</option></select><div class="field-hint">Non-English delivery constrains staffing and may extend lead time.</div></div>
+  <hr class="section-divider">
+  <div class="subsection-title">Deal type</div>
+  <div class="seg" id="deal-type-seg" role="group" aria-label="Deal type">
+    <button type="button" class="seg-btn on" data-dt="new" onclick="setDealType('new')"><span class="seg-title">New implementation</span><span class="seg-sub">First-time onboarding</span></button>
+    <button type="button" class="seg-btn" data-dt="expansion" onclick="setDealType('expansion')"><span class="seg-title">Expansion</span><span class="seg-sub">Add products or seats</span></button>
   </div>
   <hr class="section-divider">
   <div class="subsection-title">Hootsuite products</div>
   <div id="hs-products">
-    <div class="hs-product" id="prod-hse"><div class="hs-product-header" onclick="toggleHsProd('hse')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-hse" onchange="onHsCheck('hse',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">HSE</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="hse-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label>Number of seats</label><input type="number" id="hse-seats" min="1" placeholder="e.g. 50" oninput="updateHsSummary('hse')"><span class="dk-inline"><input type="checkbox" id="dk-hse" onchange="setUnknown('hse-seats','hse',this.checked)"><label for="dk-hse">Don't know yet</label></span></div></div></div>
-    <div class="hs-product" id="prod-inbox"><div class="hs-product-header" onclick="toggleHsProd('inbox')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-inbox" onchange="onHsCheck('inbox',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Advanced Inbox</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="inbox-summary"></span></div><div class="hs-product-body"><p style="font-size:13px;color:var(--color-text-secondary,#666)">No additional scoping details needed.</p></div></div>
-    <div class="hs-product" id="prod-analytics"><div class="hs-product-header" onclick="toggleHsProd('analytics')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-analytics" onchange="onHsCheck('analytics',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Advanced Analytics</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="analytics-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label>Number of connections</label><input type="number" id="analytics-connections" min="1" placeholder="e.g. 10" oninput="updateHsSummary('analytics')"><span class="dk-inline"><input type="checkbox" id="dk-analytics" onchange="setUnknown('analytics-connections','analytics',this.checked)"><label for="dk-analytics">Don't know yet</label></span></div></div></div>
-    <div class="hs-product" id="prod-listening"><div class="hs-product-header" onclick="toggleHsProd('listening')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-listening" onchange="onHsCheck('listening',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Listening</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="listening-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label>Number of queries</label><input type="number" id="listening-queries" min="1" placeholder="e.g. 5" oninput="updateHsSummary('listening')"><span class="dk-inline"><input type="checkbox" id="dk-listening" onchange="setUnknown('listening-queries','listening',this.checked)"><label for="dk-listening">Don't know yet</label></span></div></div></div>
-    <div class="hs-product" id="prod-amplify"><div class="hs-product-header" onclick="toggleHsProd('amplify')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-amplify" onchange="onHsCheck('amplify',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Amplify</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="amplify-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label>Number of seats</label><input type="number" id="amplify-seats" min="1" placeholder="e.g. 100" oninput="updateHsSummary('amplify')"><span class="dk-inline"><input type="checkbox" id="dk-amplify" onchange="setUnknown('amplify-seats','amplify',this.checked)"><label for="dk-amplify">Don't know yet</label></span></div></div></div>
+    <div class="hs-product" id="prod-perch"><div class="hs-product-header" onclick="toggleHsProd('perch')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-perch" onchange="onHsCheck('perch',this.checked)" aria-label="Include Perch"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Perch</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="perch-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label for="perch-seats">Number of seats</label><input type="number" id="perch-seats" min="1" placeholder="e.g. 50" oninput="onQtyInput('perch','perch-seats')"><span class="dk-inline"><input type="checkbox" id="dk-perch" onchange="setUnknown('perch-seats','perch',this.checked)"><label for="dk-perch">Don't know yet</label></span></div></div></div>
+    <div class="hs-product" id="prod-nest"><div class="hs-product-header" onclick="toggleHsProd('nest')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-nest" onchange="onHsCheck('nest',this.checked)" aria-label="Include Nest"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Nest</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="nest-summary"></span></div><div class="hs-product-body"><p style="font-size:13px;color:var(--color-text-secondary,#666)">No additional scoping details needed.</p></div></div>
+    <div class="hs-product" id="prod-analytics"><div class="hs-product-header" onclick="toggleHsProd('analytics')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-analytics" onchange="onHsCheck('analytics',this.checked)" aria-label="Include Advanced Analytics"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Advanced Analytics</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="analytics-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label for="analytics-connections">Number of connections</label><input type="number" id="analytics-connections" min="1" placeholder="e.g. 10" oninput="onQtyInput('analytics','analytics-connections')"><span class="dk-inline"><input type="checkbox" id="dk-analytics" onchange="setUnknown('analytics-connections','analytics',this.checked)"><label for="dk-analytics">Don't know yet</label></span></div></div></div>
+    <div class="hs-product" id="prod-lumenLite"><div class="hs-product-header" onclick="toggleHsProd('lumenLite')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-lumenLite" onchange="onHsCheck('lumenLite',this.checked)" aria-label="Include Lumen lite"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Lumen lite</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="lumenLite-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label for="lumenLite-queries">Number of queries</label><input type="number" id="lumenLite-queries" min="1" placeholder="e.g. 5" oninput="onQtyInput('lumenLite','lumenLite-queries')"><span class="dk-inline"><input type="checkbox" id="dk-lumenLite" onchange="setUnknown('lumenLite-queries','lumenLite',this.checked)"><label for="dk-lumenLite">Don't know yet</label></span></div></div></div>
+    <div class="hs-product" id="prod-parliament"><div class="hs-product-header" onclick="toggleHsProd('parliament')"><div style="display:flex;align-items:center;gap:10px"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="chk-parliament" onchange="onHsCheck('parliament',this.checked)" aria-label="Include Parliament"><div class="toggle-track"></div><div class="toggle-thumb"></div></label><span class="hs-product-name">Parliament</span></div><span style="font-size:12px;color:var(--color-text-tertiary,#999)" id="parliament-summary"></span></div><div class="hs-product-body"><div class="detail-row"><label for="parliament-seats">Number of seats</label><input type="number" id="parliament-seats" min="1" placeholder="e.g. 100" oninput="onQtyInput('parliament','parliament-seats')"><span class="dk-inline"><input type="checkbox" id="dk-parliament" onchange="setUnknown('parliament-seats','parliament',this.checked)"><label for="dk-parliament">Don't know yet</label></span></div></div></div>
   </div>
   <hr class="section-divider">
-  <div class="subsection-title">Talkwalker</div>
-  <div class="toggle-row" style="padding:6px 0"><div><div class="toggle-label">Include Talkwalker</div></div><label class="toggle"><input type="checkbox" id="has-tw" onchange="onTwChange(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
-  <div id="tw-tier-row" class="hide" style="margin-top:8px"><label class="field-label">Talkwalker product tier</label><select id="tw-tier" onchange="onTwTierChange()"><option value="core">TW Core</option><option value="analyze">TW Analyze / Research / Deep Research / Agency</option><option value="business">TW Business / Premium</option></select></div>
+  <div class="subsection-title">Lumen (Standalone)</div>
+  <div class="toggle-row" style="padding:6px 0"><div><div class="toggle-label">Include Lumen</div></div><label class="toggle"><input type="checkbox" id="has-lumen" onchange="onTwChange(this.checked)" aria-label="Include Lumen"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+  <div id="lumen-tier-row" class="hide" style="margin-top:8px">
+    <label class="field-label" for="lumen-tier">Which Lumen tier is the client buying?</label>
+    <select id="lumen-tier" onchange="onTwTierChange()"><option value="unknown">Not sure yet</option><option value="core">Lumen Core</option><option value="analyze">Lumen Analyze / Research / Deep Research / Agency</option><option value="business">Lumen Business / Premium</option></select>
+    <div class="field-hint">Just the product tier for now. Query counts and setup scoping come after you pick a services package, since the included allowance depends on it.</div>
+  </div>
   <hr class="section-divider">
   <div class="subsection-title">Deal flags</div>
   <p class="muted" style="margin-bottom:6px;font-size:12px">These can affect the recommended package.</p>
   <div class="context-card">
-    <div class="toggle-row"><div><div class="toggle-label">Migration from another platform</div><div class="toggle-sublabel">Sprinklr, Sprout, Meltwater, etc.</div></div><label class="toggle"><input type="checkbox" id="is-migration"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
-    <div class="toggle-row"><div><div class="toggle-label">Global / multi-region rollout</div><div class="toggle-sublabel">Multiple regions, timezones, or 1,000+ existing users</div></div><label class="toggle"><input type="checkbox" id="is-global"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+    <div class="toggle-row"><div><div class="toggle-label">Migration from another platform</div><div class="toggle-sublabel">Sprinklr, Sprout, Meltwater, etc.</div></div><label class="toggle"><input type="checkbox" id="is-migration" onchange="onFlagChange()" aria-label="Migration from another platform"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+    <div class="toggle-row"><div><div class="toggle-label">Global / multi-region rollout</div><div class="toggle-sublabel">Multiple regions, timezones, or 1,000+ existing users</div></div><label class="toggle"><input type="checkbox" id="is-global" onchange="onFlagChange()" aria-label="Global rollout"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+    <div class="toggle-row"><div><div class="toggle-label">Regulated industry</div><div class="toggle-sublabel">Finance, healthcare, government, pharma, insurance</div></div><label class="toggle"><input type="checkbox" id="is-regulated" onchange="onFlagChange()" aria-label="Regulated industry"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
   </div>
-  <div class="field-error hide" id="products-error" style="margin-top:14px">Please select at least one Hootsuite product or Talkwalker to continue.</div>
+  <div class="field-error hide" id="products-error" style="margin-top:14px">Please select at least one Hootsuite product or Lumen to continue.</div>
 </div>
-<div class="btn-row"><button class="btn btn-primary" onclick="goStep(2)">Continue <i class="ti ti-arrow-right"></i></button></div>
+<div class="btn-row"><button class="btn btn-primary" onclick="goStep(2)">Continue <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
 </div>
 
 <div id="step-2" class="hide">
 <div class="recap-card" id="recap-card"></div>
 <div class="card" id="rec-banner" style="background:#DFFFDE;border-color:#012B3A;margin-bottom:1rem">
   <div style="display:flex;align-items:center;gap:10px">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="#012B3A"/><path d="M6 10l3 3 5-5" stroke="#DFFFDE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#012B3A"/><path d="M6 10l3 3 5-5" stroke="#DFFFDE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <div><div style="font-weight:500;color:#012B3A;font-size:14px" id="rec-text"></div><div style="font-size:12px;color:#0f5a3a" id="rec-reason"></div></div>
   </div>
 </div>
 <div class="card">
   <div class="section-title"><i class="ti ti-package" aria-hidden="true"></i> Select service package</div>
-  <div id="warning-tw-plus" class="warning-box hide">Talkwalker is in the quote but ARR is under $25K. Minimum package is Plus.</div>
+  <div id="warning-tw-plus" class="warning-box hide">Lumen is in the quote but ARR is under $25K. Minimum package is Plus, which needs PS validation at this ARR.</div>
   <div class="pkg-grid" id="pkg-grid" style="margin-top:14px"></div>
+  <div id="flag-hint-box" class="hint-box hide" style="margin-top:12px"></div>
   <div id="upgrade-panel-wrap" class="hide" style="margin-top:12px">
     <div class="upgrade-panel open" id="upgrade-panel">
-      <div class="upgrade-panel-header" onclick="toggleUpgradePanel()">
+      <div class="upgrade-panel-header" onclick="toggleUpgradePanel()" tabindex="0" role="button" onkeydown="if(event.key==='Enter')toggleUpgradePanel()">
         <h3><i class="ti ti-trending-up" aria-hidden="true"></i> Why consider upgrading to <span id="upgrade-target-name">Advanced</span>?</h3>
-        <i class="ti ti-chevron-down" id="upgrade-chevron" style="color:#FF4C46;transition:transform 0.2s;transform:rotate(180deg)"></i>
+        <i class="ti ti-chevron-down" id="upgrade-chevron" style="color:#FF4C46;transition:transform 0.2s;transform:rotate(180deg)" aria-hidden="true"></i>
       </div>
       <div class="upgrade-panel-body">
         <div class="upgrade-grid" id="upgrade-grid"></div>
@@ -246,7 +323,7 @@ input.error{border-color:#FF4C46;background:#fff8f8}
   <div id="valueprop-box" class="valueprop"></div>
   <div id="deliverables-content"></div>
 </div>
-<div class="btn-row"><button class="btn" onclick="goStep(1)"><i class="ti ti-arrow-left"></i> Back</button><button class="btn btn-primary" onclick="goStep(3)">Continue <i class="ti ti-arrow-right"></i></button></div>
+<div class="btn-row"><button class="btn" onclick="goStep(1)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><button class="btn btn-primary" onclick="goStep(3)">Continue <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
 </div>
 
 <div id="step-3" class="hide">
@@ -256,7 +333,7 @@ input.error{border-color:#FF4C46;background:#fff8f8}
   <div id="addon-ses-included" class="info-box hide">Strategic Engagement Services is already included in Elite.</div>
   <div id="addon-list"></div>
 </div>
-<div class="btn-row"><button class="btn" onclick="goStep(2)"><i class="ti ti-arrow-left"></i> Back</button><button class="btn btn-primary" onclick="goStep(4)">Continue <i class="ti ti-arrow-right"></i></button></div>
+<div class="btn-row"><button class="btn" onclick="goStep(2)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><button class="btn btn-primary" onclick="goStep(4)">Continue <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
 </div>
 
 <div id="step-4" class="hide">
@@ -270,37 +347,50 @@ input.error{border-color:#FF4C46;background:#fff8f8}
     <div style="background:#FF4C46;color:#fff;padding:6px 14px;border-radius:8px;font-size:16px;font-weight:500" id="sum-base-price"></div>
   </div>
   <div id="sum-deliverables"></div>
+  <div style="margin-top:1rem"><div class="del-card" style="border-color:#012B3A;background:#fbfffb"><div class="del-title" style="color:#012B3A">Why this package</div><div id="sum-talktrack"></div></div></div>
   <div style="margin-top:1.25rem"><div class="section-title" style="font-size:14px"><i class="ti ti-puzzle" aria-hidden="true"></i> Add-ons</div><div id="sum-addons-content"></div></div>
   <div style="margin-top:1.25rem"><div class="section-title" style="font-size:14px"><i class="ti ti-receipt" aria-hidden="true"></i> Pricing</div>
     <div id="price-breakdown"></div>
     <div class="multi-year-row">
-      <label>Contract length:</label>
+      <label for="sum-years">Contract length:</label>
       <select id="sum-years" onchange="updateMultiYear(this.value)"><option value="1">1 year</option><option value="2">2 years</option><option value="3">3 years</option></select>
       <span id="multi-year-note" style="font-size:12px;color:var(--color-text-secondary,#666)"></span>
     </div>
     <div class="total-row"><div class="total-label">Estimated total services <span id="total-year-label">(Year 1)</span></div><div class="total-price" id="total-price-display"></div></div>
-    <div class="info-box" style="margin-top:8px;font-size:12px">Prices in USD. The package fee is recurring (multiplied by contract length). Expert Hours and SES are one-time scopes and are not multiplied. Package % applies to total tech ARR annually.</div>
+    <div class="info-box" style="margin-top:8px;font-size:12px">Prices in USD. Package fee, Expert Hours and SES all scale with contract length by default. Use the "One-time" toggle on an add-on to hold it flat. Package % applies to total tech ARR annually. This is an indicative scope, not a quote or a commercial commitment. <span id="validity-note"></span> Services pricing is not discountable by AEs; any exception requires PS leadership approval before it is offered to the client.</div>
+    <div class="lead-note" id="lead-note"></div>
   </div>
   <div style="margin-top:1.25rem"><div class="section-title" style="font-size:14px"><i class="ti ti-calendar" aria-hidden="true"></i> Implementation timeline</div>
     <div class="gantt-scroll-wrap"><div id="gantt-container"></div></div>
     <div class="gantt-legend" id="gantt-legend"></div>
   </div>
 </div>
-<div class="btn-row">
-  <button class="btn" onclick="goStep(3)"><i class="ti ti-arrow-left"></i> Back</button>
+<div class="btn-row no-print">
+  <button class="btn" onclick="goStep(3)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button>
   <button class="btn btn-outline-dark" id="pptx-btn" onclick="downloadPPTX()"><i class="ti ti-download" aria-hidden="true"></i> Download PPTX</button>
+  <label id="cmp-toggle-wrap" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--color-text-secondary,#666);cursor:pointer">
+    <input type="checkbox" id="cmp-slide-check" style="accent-color:#FF4C46;width:14px;height:14px">
+    Include two-option comparison slide
+  </label>
   <button class="btn" id="pdf-btn" onclick="downloadPDF()"><i class="ti ti-file-text" aria-hidden="true"></i> Download PDF</button>
   <button class="btn" id="share-btn" onclick="copyShareLink()"><i class="ti ti-link" aria-hidden="true"></i> Copy share link</button>
-  <button class="btn" onclick="resetAll()"><i class="ti ti-refresh"></i> New quote</button>
+  <button class="btn" onclick="resetAll()"><i class="ti ti-refresh" aria-hidden="true"></i> New quote</button>
 </div>
-<div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+<div id="ps-required-banner" class="no-print" style="display:none;margin-top:12px;padding:12px 14px;background:#fff5f5;border:1px solid #FF4C46;border-radius:8px;color:#012B3A;font-size:13px;line-height:1.5"></div>
+<div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap" class="no-print">
   <button class="btn btn-primary" id="sendps-btn" onclick="sendToPS()"><i class="ti ti-send" aria-hidden="true"></i> Send to PS</button>
   <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--color-text-secondary,#666);cursor:pointer">
     <input type="checkbox" id="ps-alert-check" style="accent-color:#FF4C46;width:14px;height:14px">
-    Also alert PS leadership
+    Flag for PS review on Slack
   </label>
-  <span id="ps-validation-note" style="font-size:12px;color:#FF4C46;display:none"><i class="ti ti-alert-triangle"></i> Validation required — alert will fire automatically</span>
+  <span id="ps-validation-note" style="font-size:12px;color:#FF4C46;display:none"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Validation required, Slack alert will fire automatically</span>
 </div>
+<div style="margin-top:8px" class="no-print" id="ps-notes-wrap">
+  <label class="field-label" for="ps-notes" style="margin-bottom:4px">Note to PS <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional, included in the alert)</span></label>
+  <textarea id="ps-notes" rows="2" maxlength="800" placeholder="Anything PS should know: timeline pressure, unusual scope, client asks, competitive situation..." style="width:100%;padding:8px 10px;border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.25));border-radius:8px;font-size:14px;font-family:Arial,sans-serif;resize:vertical"></textarea>
+</div>
+<div style="margin-top:6px;font-size:12px;color:var(--color-text-tertiary,#999)" class="no-print">You'll get a copy by email. Flagged scopes are reviewed by PS within 2 business days.</div>
+<div id="send-result" style="margin-top:10px;font-size:13px;display:none" class="no-print"></div>
 </div>
 
 </div>
@@ -308,578 +398,1268 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
+/* ============================================================
+   PS Scoping Calculator v2
+   All rates and endpoints centralised here for maintainability.
+   ============================================================ */
+
+var BUILD_DATE='2026-07-04';
+
+/* Intake endpoint: Apps Script web app deployed as "Anyone", execute as me.
+   Returns JSON so the calculator can confirm receipt (no more silent no-cors). */
 var PS_ENDPOINT='https://script.google.com/a/macros/hootsuite.com/s/AKfycbwfNxnypoi3Izrkf2fDaeeFtBjEjfqDrqDi8ZqwQZkW8d6bUpjOFuAae16GM64jPdCw/exec';
+/* Shared submit token. Must match SUBMIT_TOKEN in Code.gs. Stops random writes. */
+var SUBMIT_TOKEN='CHANGE_ME_SHARED_TOKEN';
 
-function sendToPS(){
-var needsValidation=false;var validationReasons=[];
-if(state.pkg==='plus'&&state.expertHrs>5){needsValidation=true;validationReasons.push('Expert Hours >5 on Plus');}
-if(state.pkg==='plus'&&state.sesQty>0){needsValidation=true;validationReasons.push('SES added to Plus');}
-var alertBox=document.getElementById('ps-alert-check');
-var alertRequested=alertBox?alertBox.checked:false;
-if(!needsValidation&&!alertRequested)return actualSend(false,false,needsValidation,'');
-actualSend(needsValidation,alertRequested,needsValidation,validationReasons.join(', '));
-}
+var RATES={expertHr:450,sesBlock:20000};
+var PRICING_VERSION='2026-07-v3';   /* stamp every submission so calibration data stays interpretable across price changes */
+var PLUS_HOURS_LIMIT=5;
+var NONPLUS_HOURS_WARN=50;
 
-function actualSend(needsValidation,alertRequested,flagged,validationReason){
-var aeName=sessionStorage.getItem('ps_ae_name')||'';
-if(!aeName){aeName=prompt('Your name (saved for this session):','');if(!aeName)return;sessionStorage.setItem('ps_ae_name',aeName);}
-var btn=document.getElementById('sendps-btn');var orig=btn.innerHTML;
-btn.disabled=true;btn.innerHTML='Sending...';
-var prodNames={hse:'HSE',inbox:'Adv Inbox',analytics:'Adv Analytics',listening:'Listening',amplify:'Amplify'};
-var prods=[];var ids=['hse','inbox','analytics','listening','amplify'];
-for(var i=0;i<ids.length;i++){if(state.hsProducts[ids[i]].on)prods.push(prodNames[ids[i]]);}
-if(state.hasTW)prods.push('TW '+state.twTier);
-var oneTime=(state.expertHrs*450)+((state.pkg!=='elite')?state.sesQty*20000:0);
-var total=Math.round(calcPrice(state.pkg))*state.contractYears+oneTime;
-var shareLink=location.href.split('#')[0]+'#q='+encodeURIComponent(btoa(JSON.stringify(state)));
-var payload={
-aeName:aeName,clientName:state.clientName,oppName:state.oppName,region:state.region,
-arr:state.arr,pkg:PKGS[state.pkg].name,products:prods,expertHrs:state.expertHrs,
-sesQty:state.sesQty,contractYears:state.contractYears,total:total,
-isMigration:state.isMigration,isGlobal:state.isGlobal,
-needsValidation:needsValidation,validationReason:validationReason,
-alertRequested:alertRequested,shareLink:shareLink
+var PKGS={
+  essentials:{name:'Essentials',sku:'PS_ESSENTIALS',flat:2000,pct:0},
+  plus:{name:'Plus',sku:'PS_PLUS',flat:4000,pct:0.15},
+  advanced:{name:'Advanced',sku:'PS_ADV',flat:18000,pct:0.18},
+  elite:{name:'Elite',sku:'PS_ELITE',flat:50000,pct:0.20}
 };
-fetch(PS_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
-.then(function(){btn.innerHTML='<i class="ti ti-check"></i> Sent';setTimeout(function(){btn.disabled=false;btn.innerHTML=orig;},2500);})
-.catch(function(){btn.disabled=false;btn.innerHTML=orig;alert('Could not send. Ping Damien directly.');});
-}
 
-var PKGS={essentials:{name:'Essentials',sku:'PS_ESSENTIALS',flat:2000,pct:0},plus:{name:'Plus',sku:'PS_PLUS',flat:4000,pct:0.15},advanced:{name:'Advanced',sku:'PS_ADV',flat:18000,pct:0.18},elite:{name:'Elite',sku:'PS_ELITE',flat:50000,pct:0.20}};
-var VALUEPROPS={essentials:'Speed to value: live in hours with self-paced digital onboarding, no scheduling bottlenecks.',plus:'Expert-accelerated implementation: power users driving value within the first 90 days.',advanced:'Use-case customised onboarding with a dedicated Technical Account Manager and ongoing optimization.',elite:'White-glove program and change management for complex, high-stakes, multi-team rollouts.'};
+/* Sourced from "New Professional Services Packages" enablement deck (Jan 2026), the tier headline + description. */
+var VALUEPROPS={
+  essentials:'Your path to immediate value: the most efficient, self-paced route to mastering the tool, no expensive services, no scheduling bottlenecks.',
+  plus:'Expert-accelerated implementation: personalized 1:1 consultation to get the foundational setup right while building the skills to run independently.',
+  advanced:'Use-case based customization: deeply customized onboarding and an ongoing consultative partnership designed to maximize platform ROI.',
+  elite:'Consultative, strategic onboarding: a true white-glove partnership with clear ownership, strategic project management, and a value-driven adoption plan for complex, high-stakes rollouts.'
+};
+
+/* AE-facing justification per package: the deck's own three VALUE PROPOSITION bullets per tier, lightly
+   trimmed for a small card. Sourced from the same deck, not invented. */
+var TALKTRACKS={
+  essentials:['Speed-to-value: go from contract signature to utility in hours.','Mastery on your schedule: learn features and how-tos in 5-minute segments, anytime, anywhere.','Budget-friendly: all the expert guidance without the premium price tag.'],
+  plus:['Partnership: a technical expert dedicated to your success, ensuring key users are trained and the platform is configured for maximum impact.','Confidence builder: our focus is skill transfer, so you\u2019re confident managing the tool independently, think of us as a technical co-pilot.','Accelerated success: our structured program gets power-users driving value in the first 90 days.'],
+  advanced:['Unrivaled customization: onboarding built around your specific use case, so configuration drives direct value.','Expert-led partnership: work alongside a Technical Account Manager, a dedicated, premium technical advisor providing consultative guidance.','Adoption, optimized: a custom, blended training plan ensures all user types are proficient and confident, driving faster, wider tool utilization.'],
+  elite:['Proven success model: a dual-expert team (Engagement Manager + TAM) ensures strategic project management, technical optimization, and execution excellence.','Mastery and adoption assured: bespoke enablement that trains and drives organizational change, securing long-term adoption and ROI.','Complexity, conquered: the highest level of consultative partnership, designed for the most strategic, complex deployments.']
+};
+
 var DELIVERABLES={
-essentials:{onboarding:['Group kickoff call','Account provisioning support','Self-paced digital onboarding via Sana','Digital email series'],support:['Standard support (24h SLA)','Help Centre, chat and email','Mon-Fri 9-5 local time']},
-plus:{onboarding:['1:1 admin enablement sessions per product','End-user digital training via Sana','Requirements gathering and scope alignment','Weekly syncs throughout onboarding','Launch graduation plus AM/CSM handover'],support:['Standard support (24h SLA)','Help Centre, chat and email','Mon-Fri 9-5 local time'],tw:{core:['Up to 5 queries/topics','5 channel setup','1 dashboard/report/alert','2x 1:1 training sessions'],analyze:['Up to 15 queries/topics','20 channel setup','1 dashboard/report/alert','3x 1:1 training sessions'],business:['Up to 20 queries/topics','40 channel setup','3 dashboards/reports/alerts','3x 1:1 training sessions']}},
-advanced:{onboarding:['Named Technical Account Manager','Up to 2x admin sessions per product','Blended training plan for end-users (up to 7 live sessions)','Customised onboarding to your use case','Up to 12 optimization sessions/year'],support:['Priority support (4h SLA)','Phone for 5 named contacts','24/7 on-call for business-critical issues','Help Centre, chat, email and phone'],tw:{core:['Up to 10 queries/topics','10 channel setup','3x 1:1 training sessions','Up to 1 catalogue session'],analyze:['Up to 20 queries/topics','25 channel setup','2 dashboards/reports/alerts','6x 1:1 live trainings'],business:['Up to 40 queries/topics','60 channel setup','5 dashboards/reports/alerts','6x 1:1 live trainings']}},
-elite:{onboarding:['Named Technical Account Manager','Named Engagement Manager (program and change management)','Up to 3x admin sessions per product','Blended training plan for end-users (up to 13 live sessions)','Up to 24 optimization sessions/year','ADKAR-based change management','Strategic Engagement Services included'],support:['Priority support (2h SLA)','Phone for 10 named contacts','24/7 on-call for business-critical issues','Help Centre, chat, email and phone'],tw:{core:['Up to 20 queries/topics','20 channel setup','3x 1:1 training sessions plus up to 2 catalogue'],analyze:['Up to 20 queries/topics','25 channel setup','2 dashboards/reports/alerts','8x 1:1 live trainings'],business:['Up to 40 queries/topics','60 channel setup','5 dashboards/reports/alerts','8x 1:1 live trainings']}}
+  essentials:{onboarding:['Group kickoff call','Account provisioning support','Self-paced digital onboarding via Sana','Digital email series'],support:['Standard support (24h SLA)','Help Centre, chat and email','Mon-Fri 9-5 local time']},
+  plus:{onboarding:['1:1 admin enablement sessions per product','End-user digital training via Sana','Requirements gathering and scope alignment','Weekly syncs throughout onboarding','Launch graduation plus AM/CSM handover'],support:['Standard support (24h SLA)','Help Centre, chat and email','Mon-Fri 9-5 local time'],tw:{core:['Up to 5 queries/topics','5 channel setup','1 dashboard/report/alert','2x 1:1 training sessions'],analyze:['Up to 15 queries/topics','20 channel setup','1 dashboard/report/alert','3x 1:1 training sessions'],business:['Up to 20 queries/topics','40 channel setup','3 dashboards/reports/alerts','3x 1:1 training sessions']}},
+  advanced:{onboarding:['Named Technical Account Manager','Up to 2x admin sessions per product','Blended training plan for end-users (up to 7 live sessions)','Customised onboarding to your use case','Up to 12 optimization sessions/year'],support:['Priority support (4h SLA)','Phone for 5 named contacts','24/7 on-call for business-critical issues','Help Centre, chat, email and phone'],tw:{core:['Up to 10 queries/topics','10 channel setup','3x 1:1 training sessions','Up to 1 catalogue session'],analyze:['Up to 20 queries/topics','25 channel setup','2 dashboards/reports/alerts','6x 1:1 live trainings'],business:['Up to 40 queries/topics','60 channel setup','5 dashboards/reports/alerts','6x 1:1 live trainings']}},
+  elite:{onboarding:['Named Technical Account Manager','Named Engagement Manager (program and change management)','Up to 3x admin sessions per product','Blended training plan for end-users (up to 13 live sessions)','Up to 24 optimization sessions/year','ADKAR-based change management','Strategic Engagement Services included'],support:['Priority support (2h SLA)','Phone for 10 named contacts','24/7 on-call for business-critical issues','Help Centre, chat, email and phone'],tw:{core:['Up to 20 queries/topics','20 channel setup','3x 1:1 training sessions plus up to 2 catalogue'],analyze:['Up to 20 queries/topics','25 channel setup','2 dashboards/reports/alerts','8x 1:1 live trainings'],business:['Up to 40 queries/topics','60 channel setup','5 dashboards/reports/alerts','8x 1:1 live trainings']}}
 };
+
+/* Genuine boundaries: things this tier does not include and that need an upgrade, not an add-on. */
+var EXCLUSIONS={
+  essentials:['No 1:1 admin enablement','No dedicated TAM or Engagement Manager'],
+  plus:['No dedicated Technical Account Manager','No change management program'],
+  advanced:['No named Engagement Manager','No ADKAR change management program'],
+  elite:['Custom development and API build quoted separately']
+};
+
+/* Available as an add-on: not in the base package but purchasable on top (mostly via Expert Hours).
+   Kept separate from exclusions so AEs can see the path instead of reading a hard no. */
+var ADDONS_AVAILABLE={
+  essentials:[],
+  plus:['Live end-user training (add Expert Hours; digital via Sana is included)','Migration architecture and data mapping (add Expert Hours)','Additional admin sessions (add Expert Hours)'],
+  advanced:['Strategic Engagement Services (add SES blocks)','Additional Expert Hours for custom work'],
+  elite:['Ongoing managed services beyond graduation (scoped separately)']
+};
+
 var UPGRADE_DIFFS={
-'essentials-plus':['1:1 admin implementation (was self-led)','IC-led onboarding','Requirements gathering session','Weekly syncs during onboarding'],
-'plus-advanced':['Live end-user training (up to 7 sessions vs digital only)','Named Technical Account Manager','12 optimization sessions per year','Priority support 4h SLA (was 24h)','Phone support for 5 named contacts','2x admin sessions per product (was 1x)'],
-'advanced-elite':['Named Engagement Manager','ADKAR change management program','Strategic Engagement Services included','24 optimization sessions per year (was 12)','Up to 13 live end-user sessions (was 7)','2h SLA and 10 phone contacts (was 4h and 5)']
+  'essentials-plus':['1:1 admin implementation (was self-led)','IC-led onboarding','Requirements gathering session','Weekly syncs during onboarding'],
+  'plus-advanced':['Live end-user training (up to 7 sessions vs digital only)','Named Technical Account Manager','12 optimization sessions per year','Priority support 4h SLA (was 24h)','Phone support for 5 named contacts','2x admin sessions per product (was 1x)'],
+  'advanced-elite':['Named Engagement Manager','ADKAR change management program','Strategic Engagement Services included','24 optimization sessions per year (was 12)','Up to 13 live end-user sessions (was 7)','2h SLA and 10 phone contacts (was 4h and 5)']
 };
-var state={clientName:'',oppName:'',region:'',arr:0,contractYears:1,hsProducts:{hse:{on:false,unknown:false},inbox:{on:false},analytics:{on:false,unknown:false},listening:{on:false,unknown:false},amplify:{on:false,unknown:false}},hasTW:false,twTier:'analyze',isMigration:false,isGlobal:false,pkg:'',lastRec:'',expertHrs:0,sesQty:0,completedSteps:[]};
+
+
+var LEAD_TIME={NA:'2 to 3 weeks',LATAM:'3 to 4 weeks',EMEA:'2 to 4 weeks',APAC:'3 to 5 weeks','':'2 to 4 weeks'};
+/* ---- Detailed TW scoping (optional) ----
+   Allowances from the Services by Product Matrix (last updated June 23 2026), per package + Lumen sub-tier.
+   Per-unit hours from the Lumen scoping framework (the Gemini gem).
+   First-pass only: complexity is entered by the consultant or defaults to Intermediate. No AI, no guessing.
+   Overage model: charge hours only for units ABOVE the tier allowance. All values editable here. */
+var TW_INCLUDED={
+  plus:{core:{queries:5,channels:5,dashboards:1,reports:0,alerts:0},analyze:{queries:15,channels:20,dashboards:1,reports:0,alerts:0},business:{queries:20,channels:40,dashboards:3,reports:0,alerts:0}},
+  advanced:{core:{queries:10,channels:10,dashboards:1,reports:0,alerts:0},analyze:{queries:20,channels:25,dashboards:2,reports:0,alerts:0},business:{queries:40,channels:60,dashboards:5,reports:0,alerts:0}},
+  elite:{core:{queries:20,channels:20,dashboards:1,reports:0,alerts:0},analyze:{queries:20,channels:25,dashboards:2,reports:0,alerts:0},business:{queries:40,channels:60,dashboards:5,reports:0,alerts:0}}
+};
+var LUMEN_LABELS={unknown:'Lumen (tier TBD)',core:'Lumen Core',analyze:'Lumen Analyze',business:'Lumen Business'};
+var PROD_NAMES={perch:'Perch',nest:'Nest',analytics:'Adv Analytics',lumenLite:'Lumen lite',parliament:'Parliament'};
+var QTY_FIELDS={perch:{input:'perch-seats',noun:'seats'},analytics:{input:'analytics-connections',noun:'connections'},lumenLite:{input:'lumenLite-queries',noun:'queries'},parliament:{input:'parliament-seats',noun:'seats'}};
+
+function freshState(){
+  return {clientName:'',oppName:'',sfdcUrl:'',region:'',arr:0,contractYears:1,dealType:'new',deliveryLang:'English',
+    hsProducts:{perch:{on:false,unknown:false,qty:0},nest:{on:false},analytics:{on:false,unknown:false,qty:0},lumenLite:{on:false,unknown:false,qty:0},parliament:{on:false,unknown:false,qty:0}},
+    hasLumen:false,lumenTier:'unknown',lumenQueries:0,lumenSources:0,lumenBackfill:false,
+    isMigration:false,isGlobal:false,isRegulated:false,
+    pkg:'',lastRec:'',expertHrs:0,expertHrsOneTime:false,expertHrsManual:false,hoursPicks:{},sesQty:0,sesOneTime:false,lastSubmissionId:'',completedSteps:[]};
+}
+var state=freshState();
 var warnTimer=null;
 
-function saveState(){try{sessionStorage.setItem('ps_calc_state',JSON.stringify(state));}catch(e){}}
-function loadState(){try{var s=sessionStorage.getItem('ps_calc_state');if(s){state=JSON.parse(s);restoreFormFromState();}}catch(e){}}
-function restoreFormFromState(){
-document.getElementById('client-name').value=state.clientName||'';
-document.getElementById('opp-name').value=state.oppName||'';
-document.getElementById('region').value=state.region||'';
-document.getElementById('arr-input').value=state.arr||'';
-document.getElementById('is-migration').checked=state.isMigration;
-document.getElementById('is-global').checked=state.isGlobal;
-document.getElementById('has-tw').checked=state.hasTW;
-if(state.hasTW)document.getElementById('tw-tier-row').classList.remove('hide');
-document.getElementById('tw-tier').value=state.twTier||'analyze';
-var ids=['hse','inbox','analytics','listening','amplify'];
-for(var i=0;i<ids.length;i++){var id=ids[i];var p=state.hsProducts[id];document.getElementById('chk-'+id).checked=p.on;if(p.on)document.getElementById('prod-'+id).classList.add('active');updateHsSummary(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function money(n){return '$'+Math.round(n||0).toLocaleString();}
+function validityDate(){var d=new Date();d.setDate(d.getDate()+30);return d.toISOString().substring(0,10);}
+
+function saveState(){try{localStorage.setItem('ps_calc_state',JSON.stringify(state));}catch(e){}}
+function loadState(){try{var s=localStorage.getItem('ps_calc_state');if(s){var parsed=JSON.parse(s);if(sanitizeState(parsed)){state=parsed;restoreFormFromState();}}}catch(e){}}
+
+function migrateLegacyState(o){
+  if(!o||typeof o!=='object')return o;
+  /* Talkwalker -> Lumen field renames */
+  if('hasTW' in o && !('hasLumen' in o))o.hasLumen=o.hasTW;
+  if('twTier' in o && !('lumenTier' in o))o.lumenTier=o.twTier;
+  if('twQueries' in o && !('lumenQueries' in o))o.lumenQueries=o.twQueries;
+  if('twSources' in o && !('lumenSources' in o))o.lumenSources=o.twSources;
+  if('twBackfill' in o && !('lumenBackfill' in o))o.lumenBackfill=o.twBackfill;
+  /* Product id renames inside hsProducts */
+  if(o.hsProducts&&typeof o.hsProducts==='object'){
+    var map={hse:'perch',inbox:'nest',listening:'lumenLite',amplify:'parliament'};
+    for(var oldK in map){var newK=map[oldK];if(o.hsProducts[oldK]&&!o.hsProducts[newK]){o.hsProducts[newK]=o.hsProducts[oldK];delete o.hsProducts[oldK];}}
+  }
+  return o;
 }
+function sanitizeState(o){
+  if(!o||typeof o!=='object')return false;
+  o=migrateLegacyState(o);
+  var base=freshState();
+  for(var k in base){if(!(k in o))o[k]=base[k];}
+  if(!PKGS[o.pkg])o.pkg='';
+  if(['new','expansion'].indexOf(o.dealType)===-1)o.dealType='new';
+  if(['unknown','core','analyze','business'].indexOf(o.lumenTier)===-1)o.lumenTier='unknown';
+  o.arr=Number(o.arr)||0;
+  o.contractYears=[1,2,3].indexOf(Number(o.contractYears))!==-1?Number(o.contractYears):1;
+  o.expertHrs=Math.max(0,Number(o.expertHrs)||0);
+  o.sesQty=Math.max(0,Math.min(4,Number(o.sesQty)||0));
+  o.lumenQueries=Math.max(0,Number(o.lumenQueries)||0);
+  o.lumenSources=Math.max(0,Number(o.lumenSources)||0);
+  if(!o.hsProducts||typeof o.hsProducts!=='object')o.hsProducts=base.hsProducts;
+  var ids=['perch','nest','analytics','lumenLite','parliament'];
+  for(var i=0;i<ids.length;i++){if(!o.hsProducts[ids[i]])o.hsProducts[ids[i]]={on:false};o.hsProducts[ids[i]].qty=Math.max(0,Number(o.hsProducts[ids[i]].qty)||0);}
+  if(!o.hoursPicks||typeof o.hoursPicks!=='object')o.hoursPicks={};
+  o.expertHrsManual=!!o.expertHrsManual;
+  o.clientName=String(o.clientName||'');o.oppName=String(o.oppName||'');o.sfdcUrl=String(o.sfdcUrl||'');o.lastSubmissionId=String(o.lastSubmissionId||'').substring(0,40);
+  return true;
+}
+
+function restoreFormFromState(){
+  document.getElementById('client-name').value=state.clientName||'';
+  document.getElementById('opp-name').value=state.oppName||'';
+  document.getElementById('sfdc-url').value=state.sfdcUrl||'';
+  document.getElementById('region').value=state.region||'';
+  document.getElementById('arr-input').value=state.arr||'';
+  document.getElementById('delivery-lang').value=state.deliveryLang||'English';
+  setDealType(state.dealType||'new',true);
+  document.getElementById('is-migration').checked=!!state.isMigration;
+  document.getElementById('is-global').checked=!!state.isGlobal;
+  document.getElementById('is-regulated').checked=!!state.isRegulated;
+  document.getElementById('has-lumen').checked=!!state.hasLumen;
+  if(state.hasLumen)document.getElementById('lumen-tier-row').classList.remove('hide');
+  document.getElementById('lumen-tier').value=state.lumenTier||'unknown';
+  var ids=['perch','nest','analytics','lumenLite','parliament'];
+  for(var i=0;i<ids.length;i++){
+    var id=ids[i];var p=state.hsProducts[id];
+    document.getElementById('chk-'+id).checked=!!p.on;
+    if(p.on)document.getElementById('prod-'+id).classList.add('active');
+    if(QTY_FIELDS[id]){
+      var inp=document.getElementById(QTY_FIELDS[id].input);var dk=document.getElementById('dk-'+id);
+      if(p.unknown){if(dk)dk.checked=true;if(inp){inp.disabled=true;inp.value='';inp.placeholder='TBD';}}
+      else if(inp&&p.qty){inp.value=p.qty;}
+    }
+    updateHsSummary(id);
+  }
+  onTwScopeInput(true);
+}
+
 function pingSlack(){
-var fallback=setTimeout(function(){window.open('https://slack.com/app_redirect?channel=UBKRN5R9B','_blank');},600);
-try{window.location.href='slack://user?team=&id=UBKRN5R9B';}catch(e){clearTimeout(fallback);window.open('https://slack.com/app_redirect?channel=UBKRN5R9B','_blank');}
+  var opened=false;
+  var fallback=setTimeout(function(){if(!opened){opened=true;window.open('https://slack.com/app_redirect?channel=UBKRN5R9B','_blank');}},700);
+  window.addEventListener('blur',function once(){opened=true;clearTimeout(fallback);window.removeEventListener('blur',once);},{once:true});
+  try{window.location.href='slack://user?team=&id=UBKRN5R9B';}catch(e){}
+}
+
+function setDealType(dt,silent){
+  state.dealType=dt;
+  var btns=document.querySelectorAll('#deal-type-seg .seg-btn');
+  for(var i=0;i<btns.length;i++){btns[i].classList.toggle('on',btns[i].getAttribute('data-dt')===dt);}
+  if(!silent)saveState();
+}
+function onLangChange(){state.deliveryLang=document.getElementById('delivery-lang').value;saveState();}
+function onFlagChange(){
+  state.isMigration=document.getElementById('is-migration').checked;
+  state.isGlobal=document.getElementById('is-global').checked;
+  state.isRegulated=document.getElementById('is-regulated').checked;
+  saveState();
 }
 function toggleHsProd(id){var el=document.getElementById('prod-'+id);var chk=document.getElementById('chk-'+id);if(!chk.checked){chk.checked=true;onHsCheck(id,true);}else{el.classList.toggle('active');}}
 function onHsCheck(id,val){state.hsProducts[id].on=val;document.getElementById('prod-'+id).classList.toggle('active',val);updateHsSummary(id);saveState();}
-function setUnknown(inputId,prodId,val){var inp=document.getElementById(inputId);if(val){inp.value='';inp.disabled=true;inp.placeholder='TBD';state.hsProducts[prodId].unknown=true;}else{inp.disabled=false;inp.placeholder='e.g. 50';state.hsProducts[prodId].unknown=false;}updateHsSummary(prodId);saveState();}
-function updateHsSummary(id){var p=state.hsProducts[id];var s='';var v;if(id==='hse'){v=document.getElementById('hse-seats').value;s=p.unknown?'Seats: TBD':(v?v+' seats':'');}else if(id==='analytics'){v=document.getElementById('analytics-connections').value;s=p.unknown?'Connections: TBD':(v?v+' connections':'');}else if(id==='listening'){v=document.getElementById('listening-queries').value;s=p.unknown?'Queries: TBD':(v?v+' queries':'');}else if(id==='amplify'){v=document.getElementById('amplify-seats').value;s=p.unknown?'Seats: TBD':(v?v+' seats':'');}document.getElementById(id+'-summary').textContent=s;}
-function onTwChange(val){state.hasTW=val;document.getElementById('tw-tier-row').classList.toggle('hide',!val);saveState();}
-function onTwTierChange(){state.twTier=document.getElementById('tw-tier').value;saveState();}
 
-function getRecommendedPkg(){var arr=state.arr;if(arr>=250000)return 'elite';if(arr>=100000||state.isMigration)return 'advanced';if(arr>=25000||state.hasTW){return state.isGlobal?'advanced':'plus';}return 'essentials';}
-function getEligiblePkgs(){
-var order=['essentials','plus','advanced','elite'];
-var rec=getRecommendedPkg();
-var recIdx=order.indexOf(rec);
-var eligible=[order[recIdx]];
-var next=order[recIdx+1];
-if(next){
-if(next==='plus'&&state.arr<25000){}
-else{eligible.push(next);}
+function onQtyInput(id,inputId){
+  var v=parseInt(document.getElementById(inputId).value,10);
+  state.hsProducts[id].qty=isNaN(v)?0:v;
+  state.hsProducts[id].unknown=false;
+  updateHsSummary(id);saveState();
 }
-return eligible;
+function setUnknown(inputId,prodId,val){
+  var inp=document.getElementById(inputId);
+  if(val){inp.value='';inp.disabled=true;inp.placeholder='TBD';state.hsProducts[prodId].unknown=true;state.hsProducts[prodId].qty=0;}
+  else{inp.disabled=false;inp.placeholder='e.g. 50';state.hsProducts[prodId].unknown=false;}
+  updateHsSummary(prodId);saveState();
+}
+function updateHsSummary(id){
+  var p=state.hsProducts[id];var s='';
+  if(QTY_FIELDS[id]){var noun=QTY_FIELDS[id].noun;s=p.unknown?(noun.charAt(0).toUpperCase()+noun.slice(1)+': TBD'):(p.qty?p.qty+' '+noun:'');}
+  document.getElementById(id+'-summary').textContent=s;
+}
+function onTwChange(val){state.hasLumen=val;document.getElementById('lumen-tier-row').classList.toggle('hide',!val);saveState();}
+function onTwTierChange(){state.lumenTier=document.getElementById('lumen-tier').value;onTwScopeInput();}
+/* Sets the TW tier from the Step 2 "not sure yet" comparison (as well as normal Step 1 change).
+   Keeps the Step 1 select and everything derived from state.lumenTier in sync. */
+function pickTwTier(tier){
+  state.lumenTier=tier;
+  var sel=document.getElementById('lumen-tier');if(sel)sel.value=tier;
+  onTwScopeInput(true);
+  renderRecap();
+  renderDeliverables(state.pkg);
+  renderUpgradePanel(state.pkg);
+  saveState();
+}
+/* Query allowance depends on BOTH the package and the Lumen sub-tier (from the matrix).
+   On step 1 the package may not be chosen yet, so fall back to the likely recommendation. */
+function twQueryAllowance(){
+  var pkg=state.pkg;
+  if(!TW_INCLUDED[pkg])pkg=getRecommendedPkg();
+  if(!TW_INCLUDED[pkg])pkg='plus';
+  var inc=TW_INCLUDED[pkg]&&TW_INCLUDED[pkg][state.lumenTier];
+  return {allow:inc?inc.queries:0,pkg:pkg};
+}
+function onTwScopeInput(silent){
+  var qEl=document.getElementById('lumen-queries'),sEl=document.getElementById('lumen-sources'),bEl=document.getElementById('lumen-backfill');
+  if(qEl)state.lumenQueries=parseInt(qEl.value,10)||0;
+  if(sEl)state.lumenSources=parseInt(sEl.value,10)||0;
+  if(bEl)state.lumenBackfill=bEl.checked;
+  var qa=twQueryAllowance();var allow=qa.allow;
+  var note=document.getElementById('tw-query-note');
+  if(note){
+    if(allow){
+      var others=[];
+      var order=['plus','advanced','elite'];
+      for(var i=0;i<order.length;i++){var inc=TW_INCLUDED[order[i]][state.lumenTier];if(inc)others.push(PKGS[order[i]].name+' '+inc.queries);}
+      note.textContent=PKGS[qa.pkg].name+' with '+LUMEN_LABELS[state.lumenTier]+' includes up to '+allow+' queries. Allowance by package: '+others.join(', ')+'.';
+    }else note.textContent='';
+  }
+  var warn=document.getElementById('tw-query-warn');
+  if(warn){
+    if(state.lumenQueries>allow&&allow>0){warn.style.display='block';warn.textContent='Estimated queries ('+state.lumenQueries+') exceed the '+PKGS[qa.pkg].name+' '+LUMEN_LABELS[state.lumenTier]+' allowance ('+allow+'). Expect additional configuration, a higher package, or Expert Hours. Reach out to PS for TW sizing.';}
+    else{warn.style.display='none';}
+  }
+  if(!silent)saveState();
+}
+
+
+function getRecommendedPkg(){
+  var arr=state.arr;
+  /* Deal type never changes WHICH package is recommended: every deal needs a base package.
+     Expansion nuance (keep onboarding light, lean on Expert Hours) is surfaced as
+     guidance in recReason() and buildHints(), not as an alternate package.
+     Global/multi-region and migration no longer force a tier past the Essentials/Plus
+     baseline: both are fact-based nudges shown alongside package selection (renderFlagHints),
+     not overrides. Migration still bumps Essentials to Plus, since that's about baseline
+     capability (Plus is the first tier with any 1:1 admin support), not a preference. */
+  if(arr>=250000)return 'elite';
+  if(arr>=100000)return 'advanced';
+  if(arr>=25000||state.hasLumen)return 'plus';
+  if(state.isMigration)return 'plus';
+  return 'essentials';
+}
+function arrBasedPkg(){
+  var arr=state.arr;
+  if(arr>=250000)return 'elite';
+  if(arr>=100000)return 'advanced';
+  if(arr>=25000)return 'plus';
+  return 'essentials';
+}
+function recReason(rec){
+  var base;
+  if(rec==='elite')base='ARR $250K+ - Elite recommended.';
+  else if(rec==='advanced'){
+    base='ARR $100K+ - Advanced recommended.';
+  }else if(rec==='plus'){
+    var bits=[];if(state.arr>=25000)bits.push('ARR $25K-$100K');if(state.hasLumen)bits.push('Lumen in quote');if(state.isMigration&&state.arr<25000)bits.push('migration');
+    base=(bits.join(', ')||'Deal profile')+' - Plus recommended.';
+  }else base='ARR under $25K (Hootsuite only) - Essentials recommended.';
+  return base;
+}
+function getEligiblePkgs(){
+  var order=['essentials','plus','advanced','elite'];
+  var rec=getRecommendedPkg();
+  var recIdx=order.indexOf(rec);
+  var eligible=[order[recIdx]];
+  var next=order[recIdx+1];
+  if(next)eligible.push(next);
+  if(rec==='essentials'&&eligible.indexOf('plus')===-1)eligible.push('plus');
+  return eligible;
 }
 function calcPrice(k){return Math.max(PKGS[k].flat,state.arr*PKGS[k].pct);}
 
 function updateProgress(n){
-document.getElementById('progress-fill').style.width=(n*25)+'%';
-document.getElementById('progress-label').textContent='Step '+n+' of 4';
+  document.getElementById('progress-fill').style.width=(n*25)+'%';
+  document.getElementById('progress-label').textContent='Step '+n+' of 4';
 }
-
 function goStep(n){
-if(n===2){
-state.clientName=document.getElementById('client-name').value.trim();
-state.oppName=document.getElementById('opp-name').value.trim();
-state.arr=parseFloat(document.getElementById('arr-input').value)||0;
-var arrOk=state.arr>0;
-var ids=['hse','inbox','analytics','listening','amplify'];
-var anyProduct=document.getElementById('has-tw').checked;
-for(var pi=0;pi<ids.length;pi++){if(document.getElementById('chk-'+ids[pi]).checked)anyProduct=true;}
-document.getElementById('arr-input').classList.toggle('error',!arrOk);
-document.getElementById('arr-error').classList.toggle('hide',arrOk);
-document.getElementById('products-error').classList.toggle('hide',anyProduct);
-if(!arrOk){document.getElementById('arr-input').scrollIntoView({behavior:'smooth',block:'center'});return;}
-if(!anyProduct){document.getElementById('products-error').scrollIntoView({behavior:'smooth',block:'center'});return;}
-computeRec();
-}
-if(n===3)renderAddons();
-if(n===4)renderSummary();
-if(n>1&&state.completedSteps.indexOf(n-1)===-1)state.completedSteps.push(n-1);
-saveState();
-var steps=[1,2,3,4];
-for(var i=0;i<steps.length;i++){
-var idx=steps[i];
-document.getElementById('step-'+idx).classList.toggle('hide',idx!==n);
-var nav=document.getElementById('nav-'+idx);var snum=document.getElementById('snum-'+idx);
-nav.classList.remove('active','done');
-if(idx===n){nav.classList.add('active');snum.innerHTML=idx;}
-else if(state.completedSteps.indexOf(idx)!==-1){nav.classList.add('done');snum.innerHTML='<i class="ti ti-check" style="font-size:11px"></i>';}
-else{snum.innerHTML=idx;}
-}
-updateProgress(n);
-window.scrollTo({top:0,behavior:'smooth'});
+  if(n===2){
+    state.clientName=document.getElementById('client-name').value.trim();
+    state.oppName=document.getElementById('opp-name').value.trim();
+    state.sfdcUrl=document.getElementById('sfdc-url').value.trim();
+    state.arr=parseFloat(document.getElementById('arr-input').value)||0;
+    var nameOk=!!state.clientName;
+    var arrOk=state.arr>0;
+    var ids=['perch','nest','analytics','lumenLite','parliament'];
+    var anyProduct=document.getElementById('has-lumen').checked;
+    for(var pi=0;pi<ids.length;pi++){if(document.getElementById('chk-'+ids[pi]).checked)anyProduct=true;}
+    document.getElementById('client-name').classList.toggle('error',!nameOk);
+    document.getElementById('client-error').classList.toggle('hide',nameOk);
+    document.getElementById('arr-input').classList.toggle('error',!arrOk);
+    document.getElementById('arr-error').classList.toggle('hide',arrOk);
+    document.getElementById('products-error').classList.toggle('hide',anyProduct);
+    if(!nameOk){document.getElementById('client-name').scrollIntoView({behavior:'smooth',block:'center'});return;}
+    if(!arrOk){document.getElementById('arr-input').scrollIntoView({behavior:'smooth',block:'center'});return;}
+    if(!anyProduct){document.getElementById('products-error').scrollIntoView({behavior:'smooth',block:'center'});return;}
+    computeRec();
+  }
+  if(n===3)renderAddons();
+  if(n===4)renderSummary();
+  if(n>1&&state.completedSteps.indexOf(n-1)===-1)state.completedSteps.push(n-1);
+  saveState();
+  var steps=[1,2,3,4];
+  for(var i=0;i<steps.length;i++){
+    var idx=steps[i];
+    document.getElementById('step-'+idx).classList.toggle('hide',idx!==n);
+    var nav=document.getElementById('nav-'+idx);var snum=document.getElementById('snum-'+idx);
+    nav.classList.remove('active','done');
+    if(idx===n){nav.classList.add('active');snum.textContent=idx;}
+    else if(state.completedSteps.indexOf(idx)!==-1){nav.classList.add('done');snum.innerHTML='<i class="ti ti-check" style="font-size:11px" aria-hidden="true"></i>';}
+    else{snum.textContent=idx;}
+  }
+  updateProgress(n);
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 function navToStep(n){if(n===1||state.completedSteps.indexOf(n-1)!==-1||state.completedSteps.indexOf(n)!==-1)goStep(n);}
 
 function computeRec(){
-state.region=document.getElementById('region').value;
-state.hasTW=document.getElementById('has-tw').checked;
-state.isMigration=document.getElementById('is-migration').checked;
-state.isGlobal=document.getElementById('is-global').checked;
-state.twTier=document.getElementById('tw-tier').value;
-var ids=['hse','inbox','analytics','listening','amplify'];
-for(var i=0;i<ids.length;i++){state.hsProducts[ids[i]].on=document.getElementById('chk-'+ids[i]).checked;}
-var rec=getRecommendedPkg();
-var reason='';
-if(rec==='elite')reason='ARR $250K+ - Elite recommended.';
-else if(rec==='advanced')reason='ARR $100K-$250K, migration, or global rollout - Advanced recommended.';
-else if(rec==='plus')reason='ARR $25K-$100K or Talkwalker in quote - Plus recommended.';
-else reason='ARR under $25K (Hootsuite only) - Essentials recommended.';
-document.getElementById('rec-text').textContent='Recommended: '+PKGS[rec].name+' package';
-document.getElementById('rec-reason').textContent=reason;
-document.getElementById('warning-tw-plus').classList.toggle('hide',!(state.hasTW&&state.arr<25000));
-if(state.lastRec!==rec)state.pkg=rec;
-state.lastRec=rec;
-if(!state.pkg||getEligiblePkgs().indexOf(state.pkg)===-1)state.pkg=rec;
-renderRecap();
-renderPkgGrid(rec);renderDeliverables(state.pkg);renderUpgradePanel(state.pkg);
+  state.region=document.getElementById('region').value;
+  state.hasLumen=document.getElementById('has-lumen').checked;
+  state.isMigration=document.getElementById('is-migration').checked;
+  state.isGlobal=document.getElementById('is-global').checked;
+  state.isRegulated=document.getElementById('is-regulated').checked;
+  state.lumenTier=document.getElementById('lumen-tier').value;
+  var ids=['perch','nest','analytics','lumenLite','parliament'];
+  for(var i=0;i<ids.length;i++){state.hsProducts[ids[i]].on=document.getElementById('chk-'+ids[i]).checked;}
+  var rec=getRecommendedPkg();
+  document.getElementById('rec-text').textContent='Recommended: '+PKGS[rec].name+' package';
+  document.getElementById('rec-reason').textContent=recReason(rec);
+  document.getElementById('warning-tw-plus').classList.toggle('hide',!(state.hasLumen&&state.arr<25000));
+  if(state.lastRec!==rec)state.pkg=rec;
+  state.lastRec=rec;
+  if(!state.pkg||getEligiblePkgs().indexOf(state.pkg)===-1)state.pkg=rec;
+  renderRecap();renderPkgGrid(rec);renderDeliverables(state.pkg);renderUpgradePanel(state.pkg);
 }
 
 function renderRecap(){
-var parts=[];
-if(state.clientName)parts.push('<b>'+state.clientName+'</b>');
-parts.push('ARR <b>$'+Math.round(state.arr).toLocaleString()+'</b>');
-var prodNames={hse:'HSE',inbox:'Adv Inbox',analytics:'Adv Analytics',listening:'Listening',amplify:'Amplify'};
-var prods=[];var ids=['hse','inbox','analytics','listening','amplify'];
-for(var i=0;i<ids.length;i++){if(state.hsProducts[ids[i]].on)prods.push(prodNames[ids[i]]);}
-if(state.hasTW){var twL={core:'TW Core',analyze:'TW Analyze',business:'TW Business'};prods.push(twL[state.twTier]);}
-if(prods.length)parts.push(prods.join(', '));
-var flags=[];if(state.isMigration)flags.push('Migration');if(state.isGlobal)flags.push('Global');
-if(flags.length)parts.push(flags.join(', '));
-document.getElementById('recap-card').innerHTML='<i class="ti ti-file-description" style="color:#012B3A"></i> '+parts.join('  &middot;  ');
+  var dtLabel={new:'New implementation',expansion:'Expansion'}[state.dealType];
+  var parts=[];
+  if(state.clientName)parts.push('<b>'+esc(state.clientName)+'</b>');
+  parts.push(esc(dtLabel));
+  parts.push('ARR <b>'+money(state.arr)+'</b>');
+  var prods=[];var ids=['perch','nest','analytics','lumenLite','parliament'];
+  for(var i=0;i<ids.length;i++){if(state.hsProducts[ids[i]].on)prods.push(PROD_NAMES[ids[i]]);}
+  if(state.hasLumen)prods.push(LUMEN_LABELS[state.lumenTier]);
+  if(prods.length)parts.push(esc(prods.join(', ')));
+  var flags=[];if(state.isMigration)flags.push('Migration');if(state.isGlobal)flags.push('Global');
+  if(flags.length)parts.push(esc(flags.join(', ')));
+  document.getElementById('recap-card').innerHTML='<i class="ti ti-file-description" style="color:#012B3A" aria-hidden="true"></i> '+parts.join('  &middot;  ');
 }
 
 function renderPkgGrid(rec){
-var order=['essentials','plus','advanced','elite'];
-var priceLabel={essentials:'$2,000 flat',plus:'Greater of $4K or 15%',advanced:'Greater of $18K or 18%',elite:'Greater of $50K or 20%'};
-var arrLabel={essentials:'ARR < $25K',plus:'ARR $25K-$100K',advanced:'ARR $100K-$250K',elite:'ARR $250K+'};
-var eligible=getEligiblePkgs();var html='';
-for(var i=0;i<order.length;i++){
-var k=order[i];var p=PKGS[k];var isRec=k===rec;var isSel=state.pkg===k;var disabled=eligible.indexOf(k)===-1;
-var style=disabled?' style="opacity:0.35;cursor:not-allowed;pointer-events:none"':'';
-var calc='$'+Math.round(calcPrice(k)).toLocaleString();
-html+='<div class="pkg-card'+(isSel&&!disabled?' selected':'')+(isRec?' recommended':'')+'"'+style+' onclick="selectPkg(\''+k+'\')">';
-if(isRec)html+='<div class="rec-badge">Recommended</div>';
-html+='<div class="pkg-name">'+p.name+'</div><div class="pkg-calc-price">'+calc+'</div><div class="pkg-price">'+priceLabel[k]+'</div><div class="pkg-arr">'+arrLabel[k]+'</div></div>';
+  var order=['essentials','plus','advanced','elite'];
+  var eligible=getEligiblePkgs();
+  var priceLabel={essentials:'$2,000 flat',plus:'Greater of $4K or 15%',advanced:'Greater of $18K or 18%',elite:'Greater of $50K or 20%'};
+  var arrLabel={essentials:'ARR < $25K',plus:'ARR $25K-$100K',advanced:'ARR $100K-$250K',elite:'ARR $250K+'};
+  var grid=document.getElementById('pkg-grid');grid.innerHTML='';
+  for(var i=0;i<order.length;i++){
+    var k=order[i];var p=PKGS[k];var isRec=k===rec;var isSel=state.pkg===k;var disabled=eligible.indexOf(k)===-1;
+    var btn=document.createElement('button');
+    btn.type='button';btn.className='pkg-card'+(isSel&&!disabled?' selected':'')+(isRec?' recommended':'');
+    btn.disabled=disabled;
+    (function(key){btn.onclick=function(){selectPkg(key,this);};})(k);
+    btn.innerHTML=(isRec?'<div class="rec-badge">Recommended</div>':'')+
+      '<div class="pkg-name">'+esc(p.name)+'</div>'+
+      '<div class="pkg-calc-price">'+money(calcPrice(k))+'</div>'+
+      '<div class="pkg-price">'+priceLabel[k]+'</div>'+
+      '<div class="pkg-arr">'+arrLabel[k]+'</div>';
+    grid.appendChild(btn);
+  }
 }
-document.getElementById('pkg-grid').innerHTML=html;
+function selectPkg(k,el){
+  state.pkg=k;
+  var cards=document.querySelectorAll('.pkg-card');
+  for(var i=0;i<cards.length;i++)cards[i].classList.remove('selected');
+  if(el)el.classList.add('selected');
+  renderDeliverables(k);renderUpgradePanel(k);saveState();
 }
-function selectPkg(k){state.pkg=k;var cards=document.querySelectorAll('.pkg-card');for(var i=0;i<cards.length;i++){cards[i].classList.remove('selected');}event.currentTarget.classList.add('selected');renderDeliverables(k);renderUpgradePanel(k);saveState();}
 
+/* Global/multi-region and migration no longer force a package; each is a fact-based nudge
+   shown next to whichever tier is currently selected, only when Advanced is actually
+   selectable from here (avoids pointing at an upgrade the eligible-packages list won't allow).
+   If both flags are set, both messages show, stacked. */
+function renderFlagHints(selected){
+  var box=document.getElementById('flag-hint-box');
+  if(!box)return;
+  var order=['essentials','plus','advanced','elite'];
+  var belowAdvanced=order.indexOf(selected)<order.indexOf('advanced');
+  var eligible=getEligiblePkgs();
+  var advancedEligible=eligible.indexOf('advanced')!==-1;
+  var msgs=[];
+  if(state.isGlobal){
+    if(belowAdvanced&&advancedEligible){
+      msgs.push('This deal is flagged as global / multi-region. The recommended combination is Advanced plus Strategic Engagement Services: a dedicated Engagement Manager coordinates stakeholders and manages change across regions and timezones, which a package upgrade alone doesn\u2019t cover. Not required, but worth reviewing the comparison below.');
+    }else if(selected==='advanced'&&(state.sesQty||0)===0){
+      msgs.push('This deal is flagged as global / multi-region. Consider adding Strategic Engagement Services in the Add-ons step: a dedicated Engagement Manager coordinates stakeholders and manages change across regions and timezones.');
+    }
+  }
+  if(belowAdvanced&&advancedEligible&&state.isMigration){
+    msgs.push('This deal is flagged as a migration. Migration architecture and data mapping can be scoped as Expert Hours on '+esc(PKGS[selected].name)+', no upgrade required. Advanced adds a named Technical Account Manager if the client wants a single owner managing the cutover. Not required, but worth reviewing the comparison below.');
+  }
+  if(!msgs.length){box.classList.add('hide');box.innerHTML='';return;}
+  box.classList.remove('hide');
+  box.innerHTML=msgs.map(function(m){return '<div style="margin-bottom:4px"><i class="ti ti-info-circle" aria-hidden="true"></i> '+m+'</div>';}).join('');
+}
 function renderUpgradePanel(selected){
-var order=['essentials','plus','advanced','elite'];var idx=order.indexOf(selected);var next=order[idx+1];
-var eligible=getEligiblePkgs();var wrap=document.getElementById('upgrade-panel-wrap');var topNote=document.getElementById('top-tier-note');
-var hasUpgrade=next&&eligible.indexOf(next)!==-1&&UPGRADE_DIFFS[selected+'-'+next];
-if(!hasUpgrade){wrap.classList.add('hide');topNote.classList.remove('hide');return;}
-topNote.classList.add('hide');wrap.classList.remove('hide');
-var diffs=UPGRADE_DIFFS[selected+'-'+next];
-document.getElementById('upgrade-target-name').textContent=PKGS[next].name;
-var currentItems=DELIVERABLES[selected].onboarding.slice(0,4);
-var html='<div class="upgrade-col current"><div class="upgrade-col-title">'+PKGS[selected].name+' current</div>';
-for(var i=0;i<currentItems.length;i++){html+='<div class="upgrade-item">'+currentItems[i]+'</div>';}
-html+='</div><div class="upgrade-col next"><div class="upgrade-col-title">'+PKGS[next].name+' what you gain</div>';
-for(var j=0;j<diffs.length;j++){html+='<div class="upgrade-item new-feature">'+diffs[j]+'</div>';}
-html+='</div>';
-document.getElementById('upgrade-grid').innerHTML=html;
-var delta=calcPrice(next)-calcPrice(selected);
-document.getElementById('upgrade-price-delta').textContent='Upgrading to '+PKGS[next].name+' adds about $'+Math.round(delta).toLocaleString()+' to this deal';
+  renderFlagHints(selected);
+  var order=['essentials','plus','advanced','elite'];var idx=order.indexOf(selected);var next=order[idx+1];
+  var eligible=getEligiblePkgs();var wrap=document.getElementById('upgrade-panel-wrap');var topNote=document.getElementById('top-tier-note');
+  topNote.textContent='This is the highest service tier available for this deal.';
+  var hasUpgrade=next&&eligible.indexOf(next)!==-1&&UPGRADE_DIFFS[selected+'-'+next];
+  if(!hasUpgrade){wrap.classList.add('hide');topNote.classList.remove('hide');return;}
+  topNote.classList.add('hide');wrap.classList.remove('hide');
+  var diffs=UPGRADE_DIFFS[selected+'-'+next];
+  document.getElementById('upgrade-target-name').textContent=PKGS[next].name;
+  var currentItems=DELIVERABLES[selected].onboarding.slice(0,4);
+  var html='<div class="upgrade-col current"><div class="upgrade-col-title">'+esc(PKGS[selected].name)+' current</div>';
+  for(var i=0;i<currentItems.length;i++)html+='<div class="upgrade-item">'+esc(currentItems[i])+'</div>';
+  html+='</div><div class="upgrade-col next"><div class="upgrade-col-title">'+esc(PKGS[next].name)+' what you gain</div>';
+  for(var j=0;j<diffs.length;j++)html+='<div class="upgrade-item new-feature">'+esc(diffs[j])+'</div>';
+  html+='</div>';
+  document.getElementById('upgrade-grid').innerHTML=html;
+  var delta=calcPrice(next)-calcPrice(selected);
+  document.getElementById('upgrade-price-delta').textContent='Upgrading to '+PKGS[next].name+' adds about '+money(delta)+' to this deal';
 }
 function toggleUpgradePanel(){var p=document.getElementById('upgrade-panel');var ch=document.getElementById('upgrade-chevron');p.classList.toggle('open');ch.style.transform=p.classList.contains('open')?'rotate(180deg)':'rotate(0deg)';}
 
 function renderDeliverables(k){
-document.getElementById('valueprop-box').textContent=VALUEPROPS[k];
-var d=DELIVERABLES[k];var twBlock='';
-if(state.hasTW&&d.tw&&d.tw[state.twTier]){
-var labels={core:'Core',analyze:'Analyze/Research',business:'Business/Premium'};
-var tierLabel=labels[state.twTier];
-twBlock='<div class="del-card"><div class="del-title">Talkwalker ('+tierLabel+')</div>';
-var twItems=d.tw[state.twTier];
-for(var t=0;t<twItems.length;t++){twBlock+='<div class="del-item">'+twItems[t]+'</div>';}
-twBlock+='</div>';
-}
-var onb='';for(var a=0;a<d.onboarding.length;a++){onb+='<div class="del-item">'+d.onboarding[a]+'</div>';}
-var sup='';for(var b=0;b<d.support.length;b++){sup+='<div class="del-item">'+d.support[b]+'</div>';}
-document.getElementById('deliverables-content').innerHTML='<div class="deliverables-grid"><div class="del-card"><div class="del-title">Onboarding and enablement</div>'+onb+'</div><div class="del-card"><div class="del-title">Support</div>'+sup+'</div>'+twBlock+'</div>';
+  document.getElementById('valueprop-box').textContent=VALUEPROPS[k];
+  var d=DELIVERABLES[k];var twBlock='';
+  if(state.hasLumen&&d.tw&&d.tw[state.lumenTier]){
+    var labels={core:'Core',analyze:'Analyze/Research',business:'Business/Premium'};
+    twBlock='<div class="del-card"><div class="del-title">Lumen ('+esc(labels[state.lumenTier])+')</div>';
+    var twItems=d.tw[state.lumenTier];
+    for(var t=0;t<twItems.length;t++)twBlock+='<div class="del-item">'+esc(twItems[t])+'</div>';
+    twBlock+='</div>';
+  }else if(state.hasLumen&&state.lumenTier==='unknown'){
+    var tiers=[['core','Core'],['analyze','Analyze/Research'],['business','Business/Premium']];
+    twBlock='<div class="del-card" style="grid-column:1/-1"><div class="del-title">Lumen: not sure which tier yet, here is what each includes</div>';
+    twBlock+='<div class="deliverables-grid" style="margin-top:6px">';
+    for(var ti=0;ti<tiers.length;ti++){
+      var tk=tiers[ti][0],tl=tiers[ti][1];var items=(d.tw&&d.tw[tk])?d.tw[tk]:[];
+      twBlock+='<div class="del-card" style="background:var(--color-background-primary,#fff)"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-weight:500;font-size:13px">'+esc(tl)+'</span><button type="button" class="btn btn-sm" onclick="pickTwTier(\''+tk+'\')">Use this</button></div>';
+      for(var ii=0;ii<items.length;ii++)twBlock+='<div class="del-item" style="font-size:12px">'+esc(items[ii])+'</div>';
+      twBlock+='</div>';
+    }
+    twBlock+='</div><div class="field-hint" style="margin-top:6px">Picking a tier here sets it for the rest of the quote, same as choosing it on Step 1.</div></div>';
+  }
+  var onb='';for(var a=0;a<d.onboarding.length;a++)onb+='<div class="del-item">'+esc(d.onboarding[a])+'</div>';
+  var sup='';for(var b=0;b<d.support.length;b++)sup+='<div class="del-item">'+esc(d.support[b])+'</div>';
+  var exc='';var ex=EXCLUSIONS[k]||[];for(var e=0;e<ex.length;e++)exc+='<div class="del-item excl-item">'+esc(ex[e])+'</div>';
+  var add='';var av=ADDONS_AVAILABLE[k]||[];for(var g=0;g<av.length;g++)add+='<div class="del-item add-item">'+esc(av[g])+'</div>';
+  var excCard=exc?('<div class="del-card excl"><div class="del-title">Not included (needs a higher tier)</div>'+exc+'</div>'):'';
+  var addCard;
+  if(k==='essentials'){
+    addCard='<div class="del-card excl"><div class="del-title">Add-ons</div><div class="del-item excl-item">No add-ons available on Essentials. Upgrade to Plus if the client needs Expert Hours, training, or anything else.</div></div>';
+  }else{
+    addCard=add?('<div class="del-card addon"><div class="del-title" style="color:#0f5a3a">Available as an add-on</div>'+add+'</div>'):'';
+  }
+  document.getElementById('deliverables-content').innerHTML=
+    '<div class="deliverables-grid">'+
+      '<div class="del-card"><div class="del-title">Onboarding and enablement</div>'+onb+'</div>'+
+      '<div class="del-card"><div class="del-title">Support</div>'+sup+'</div>'+
+      twBlock+
+      addCard+
+      excCard+
+    '</div>';
 }
 
 function buildHints(){
-var k=state.pkg;var hints=[];
-if(k==='plus'&&state.hsProducts.hse.on)hints.push('End-user training for HSE is not included in Plus. Add 5 hours of Expert Hours if 1:1 end-user training is needed.');
-if(k==='plus'&&state.isMigration)hints.push('Migration detected. Consider upgrading to Advanced, or scope additional Expert Hours. Reach out to PS for sizing help.');
-if(state.hasTW&&state.twTier==='business')hints.push('TW Business/Premium implementations can be complex. If query volumes are large or unclear, reach out to PS for scoping support.');
-return hints;
+  var k=state.pkg;var hints=[];
+  if(state.dealType==='expansion')hints.push('Expansion: scope onboarding only for the products being added, not the whole platform.');
+  if(k==='plus'&&state.hsProducts.perch.on)hints.push('End-user training for Perch is not included in Plus. Typically about '+PLUS_HOURS_LIMIT+'h in Expert Hours, put 5 in the hours field if the client needs it.');
+  if(k==='plus'&&state.isMigration)hints.push('Migration detected. Scope migration architecture and data mapping as Expert Hours below; upgrading to Advanced isn\u2019t required unless the client wants a named Technical Account Manager for the cutover. Reach out to PS for sizing help.');
+  if(state.hasLumen&&state.lumenTier==='business')hints.push('Lumen Business/Premium implementations can be complex. If query volumes are large or unclear, reach out to PS for scoping support.');
+  return hints;
+}
+
+
+/* Expert Hours catalogue (v3, July 6 2026). Values are midpoints from published ranges.
+   Kept as a single constant so PS can tune numbers without hunting through code. */
+var HOURS_CATALOGUE={
+  common:[
+    {id:'training',label:'Product training session',h:1,hint:'1h each',type:'qty'},
+    {id:'strategy',label:'Strategy session',h:5,hint:'5h each',type:'qty'},
+    {id:'consulting',label:'Consulting workshop',h:10,hint:'10h each',type:'qty'},
+    {id:'audit',label:'Organisation platform audit',h:4,hint:'4h',type:'toggle'},
+    {id:'sso',label:'SSO / SCIM setup',h:2,hint:'2h',type:'toggle'},
+    {id:'approvals',label:'Approval workflows setup',h:2,hint:'2h',type:'toggle'}
+  ],
+  lumen:[
+    {id:'lumenQBasic',label:'Query build - basic',h:0.5,hint:'30 min each',type:'qty'},
+    {id:'lumenQInt',label:'Query build - intermediate',h:1.5,hint:'1.5h each',type:'qty'},
+    {id:'lumenQComplex',label:'Query build - complex',h:4.5,hint:'4.5h each',type:'qty'},
+    {id:'lumenDBasic',label:'Dashboard - basic',h:2,hint:'2h each (under 10 widgets)',type:'qty'},
+    {id:'lumenDInt',label:'Dashboard - intermediate',h:4,hint:'4h each (20-40 widgets)',type:'qty'},
+    {id:'lumenDComplex',label:'Dashboard - complex',h:6,hint:'6h each (40+ widgets)',type:'qty'},
+    {id:'lumenMig',label:'Lumen migration architecture',h:3.5,hint:'3.5h per workspace',type:'qty'},
+    {id:'lumenAI',label:'AI classifier',h:3,hint:'3h each',type:'qty'}
+  ]
+};
+function pickerItems(){var out=HOURS_CATALOGUE.common.slice();if(state.hasLumen)out=out.concat(HOURS_CATALOGUE.lumen);return out;}
+function pickerHoursTotal(){var items=pickerItems();var t=0;for(var i=0;i<items.length;i++){var it=items[i];var v=state.hoursPicks[it.id];if(!v)continue;t+=it.type==='toggle'?it.h:(Number(v)||0)*it.h;}return t;}
+function hoursPicksSummary(){var items=pickerItems();var out=[];for(var i=0;i<items.length;i++){var it=items[i];var v=state.hoursPicks[it.id];if(!v)continue;out.push(it.label+(it.type==='qty'?(' x '+v):''));}return out.join(', ');}
+function onPickerChange(id,val,type){
+  if(type==='toggle')state.hoursPicks[id]=val?true:0;
+  else{var n=Math.max(0,Math.min(50,parseInt(val,10)||0));state.hoursPicks[id]=n;}
+  var sum=pickerHoursTotal();var sumEl=document.getElementById('picker-sum');
+  if(sumEl)sumEl.textContent=sum>0?(Math.ceil(sum)+'h from catalogue'):'0h from catalogue';
+  var applyBtn=document.getElementById('picker-apply');
+  if(applyBtn)applyBtn.disabled=sum<=0;
+  saveState();
+}
+function applyPickerToHours(){
+  var sum=Math.ceil(pickerHoursTotal());if(sum<=0)return;
+  state.expertHrsManual=false;state.expertHrs=sum;
+  var input=document.getElementById('expert-hrs-input');if(input)input.value=sum;
+  var disp=document.getElementById('hrs-total-display');if(disp)disp.textContent=money(expertHrsAmount());
+  saveState();
+}
+function togglePicker(){
+  var body=document.getElementById('picker-body');var chev=document.getElementById('picker-chev');
+  if(!body)return;var open=body.classList.toggle('hide')===false;
+  if(chev)chev.textContent=open?'\u25BC':'\u25B6';
+}
+function renderPicker(){
+  var isLumen=state.hasLumen;
+  var openByDefault=(state.pkg==='advanced'||state.pkg==='elite');
+  var chev=openByDefault?'\u25BC':'\u25B6';
+  var bodyClass=openByDefault?'':'hide';
+  var ariaExp=openByDefault?'true':'false';
+  var html='<div class="picker-collapse"><button type="button" class="picker-header" onclick="togglePicker()" aria-expanded="'+ariaExp+'"><span id="picker-chev">'+chev+'</span> Expert Hours catalogue</button>';
+  html+='<div id="picker-body" class="'+bodyClass+' picker-body">';
+  html+='<div class="picker-list">';
+  for(var i=0;i<HOURS_CATALOGUE.common.length;i++){
+    var it=HOURS_CATALOGUE.common[i];var cur=state.hoursPicks[it.id]||0;
+    html+='<div class="picker-row"><div class="picker-row-label"><span class="pr-title">'+esc(it.label)+'</span><span class="pr-hint">'+esc(it.hint)+'</span></div>';
+    if(it.type==='toggle'){
+      html+='<label class="picker-row-input"><input type="checkbox" '+(cur?'checked':'')+' onchange="onPickerChange(\''+it.id+'\',this.checked,\'toggle\')"></label>';
+    }else{
+      html+='<div class="picker-row-input"><input type="number" min="0" max="50" value="'+(cur||'')+'" placeholder="0" onchange="onPickerChange(\''+it.id+'\',this.value,\'qty\')" class="pr-qty"></div>';
+    }
+    html+='</div>';
+  }
+  html+='</div>';
+  if(isLumen){
+    html+='<div class="picker-section-title">Lumen extras <span class="picker-section-note">Sizing varies, PS will confirm on review.</span></div>';
+    html+='<div class="picker-list">';
+    for(var j=0;j<HOURS_CATALOGUE.lumen.length;j++){
+      var lit=HOURS_CATALOGUE.lumen[j];var lcur=state.hoursPicks[lit.id]||0;
+      html+='<div class="picker-row"><div class="picker-row-label"><span class="pr-title">'+esc(lit.label)+'</span><span class="pr-hint">'+esc(lit.hint)+'</span></div>';
+      html+='<div class="picker-row-input"><input type="number" min="0" max="50" value="'+(lcur||'')+'" placeholder="0" onchange="onPickerChange(\''+lit.id+'\',this.value,\'qty\')" class="pr-qty"></div></div>';
+    }
+    html+='</div>';
+  }
+  var sum=Math.ceil(pickerHoursTotal());
+  html+='<div class="picker-footer"><span id="picker-sum">'+(sum>0?(sum+'h from catalogue'):'0h from catalogue')+'</span><button type="button" id="picker-apply" class="btn btn-sm" '+(sum<=0?'disabled':'')+' onclick="applyPickerToHours()">Apply to Expert Hours</button></div>';
+  html+='</div></div>';
+  return html;
 }
 
 function renderAddons(){
-var k=state.pkg;var isEssentials=k==='essentials';var isElite=k==='elite';
-document.getElementById('addon-essentials-warning').classList.toggle('hide',!isEssentials);
-document.getElementById('addon-ses-included').classList.toggle('hide',!isElite);
-if(isEssentials){document.getElementById('addon-list').innerHTML='';return;}
-var hints=buildHints();var html='';
-for(var i=0;i<hints.length;i++){html+='<div class="hint-box">'+hints[i]+'</div>';}
-var hrsVal=state.expertHrs||0;
-var hrsTotal=hrsVal>0?'$'+(hrsVal*450).toLocaleString():'--';
-html+='<div class="addon-row"><div class="addon-info">';
-html+='<div class="addon-name">Expert Hours<span class="sku-chip">PS_EXPERT_HRS</span></div>';
-html+='<div class="addon-desc">Flexible hours for technical configuration, platform setup, end-user training, data analysis, social strategy, migration architecture, and more. $450/h.</div>';
-html+='<div class="hours-row"><label>Hours to include:</label>';
-html+='<input type="number" id="expert-hrs-input" min="0" step="1" value="'+hrsVal+'" style="width:80px" oninput="onExpertHrsChange(parseInt(this.value)||0)">';
-html+='<span class="hours-total" id="hrs-total-display">'+hrsTotal+'</span></div>';
-html+='<div class="warn-hours" id="warn-hrs">More than 5 hours on a '+PKGS[k].name+' package needs to be validated with PS leadership before including this.</div>';
-html+='</div></div>';
-if(state.isMigration||state.isGlobal){html+='<div class="reach-out-box">Migration or global rollout detected. Hour volumes can vary significantly. Reach out to PS before finalising scope.</div>';}
-if(!isElite){
-var sesVal=state.sesQty||0;
-var sesTotal=sesVal>0?'$'+(sesVal*20000).toLocaleString():'--';
-html+='<div class="addon-row"><div class="addon-info">';
-html+='<div class="addon-name">Strategic Engagement Services<span class="sku-chip">PS_SES</span></div>';
-html+='<div class="addon-desc">Dedicated Engagement Manager for project management, stakeholder coordination, and ADKAR-based change management. $20K per 3-month block.</div>';
-html+='<div class="hours-row"><label>Blocks (3 months each):</label>';
-html+='<input type="number" id="ses-qty-input" min="0" max="4" step="1" value="'+sesVal+'" style="width:60px" oninput="onSesChange(parseInt(this.value)||0)">';
-html+='<span class="hours-total" id="ses-total-display">'+sesTotal+'</span></div>';
-html+='<div class="addon-note">1 block = 3 months of Engagement Manager support (max 4 blocks = 12 months).</div>';
-html+='<div class="warn-hours" id="warn-ses">Adding SES to a Plus deal needs to be validated with PS leadership before including this.</div>';
-html+='</div></div>';
-}
-document.getElementById('addon-list').innerHTML=html;
-onExpertHrsChange(hrsVal,true);
-onSesChange(state.sesQty||0,true);
+  var k=state.pkg;var isEssentials=k==='essentials';var isElite=k==='elite';
+  document.getElementById('addon-essentials-warning').classList.toggle('hide',!isEssentials);
+  document.getElementById('addon-ses-included').classList.toggle('hide',!isElite);
+  if(isEssentials){document.getElementById('addon-list').innerHTML='';return;}
+  var hints=buildHints();var html='';
+  for(var i=0;i<hints.length;i++)html+='<div class="hint-box">'+esc(hints[i])+'</div>';
+  var hrsVal=state.expertHrs||0;
+  var hrsTotal=hrsVal>0?money(expertHrsAmount()):'--';
+  var includedHint=(state.pkg==='advanced'||state.pkg==='elite')?'<div class="hours-guide-included"><i class="ti ti-info-circle" aria-hidden="true"></i> Your package already includes 12h/year of Expert Hours. Add-on hours below are on top of that.</div>':'';
+  html+='<div class="addon-row"><div class="addon-info">';
+  html+='<div class="addon-name">Expert Hours<span class="sku-chip">PS_EXPERT_HRS</span></div>';
+  html+='<div class="addon-desc">Flexible hours for training, technical services, strategy sessions, and social listening reports. '+money(RATES.expertHr)+'/h.</div>';
+  var trainingGuide=(state.pkg==='plus')?'<div class="hours-guide">For 1:1 Hootsuite end-user training on Plus, add 5 hours.<br>For anything bigger, the catalogue below shows typical sizings PS uses. Unsure? Leave blank, PS will size on review.</div>':'<div class="hours-guide">The catalogue below shows typical sizings PS uses. Unsure? Leave blank, PS will size on review.</div>';
+  html+=trainingGuide;
+  html+=includedHint;
+  html+='<div class="hours-row"><label for="expert-hrs-input">Hours to include:</label>';
+  html+='<input type="number" id="expert-hrs-input" min="0" step="1" value="'+hrsVal+'" style="width:80px" oninput="onExpertHrsInput(this.value)">';
+  html+='<span class="hours-total" id="hrs-total-display">'+hrsTotal+'</span></div>';
+  html+='<div style="margin-top:6px"><span class="dk-inline"><input type="checkbox" id="expert-hrs-onetime" '+(state.expertHrsOneTime?'checked':'')+' onchange="onExpertHrsOneTimeChange(this.checked)"><label for="expert-hrs-onetime">One-time scope (don\'t multiply by contract years)</label></span></div>';
+  html+='<div class="warn-hours" id="warn-hrs"></div>';
+  html+=renderPicker();
+  html+='</div></div>';
+  if(!isElite){
+    var sesVal=state.sesQty||0;
+    var sesTotal=sesVal>0?money(sesVal*RATES.sesBlock):'--';
+    html+='<div class="addon-row"><div class="addon-info">';
+    html+='<div class="addon-name">Strategic Engagement Services<span class="sku-chip">PS_SES</span></div>';
+    html+='<div class="addon-desc">Dedicated Engagement Manager for project management, stakeholder coordination, and ADKAR-based change management. '+money(RATES.sesBlock)+' per 3-month block.</div>';
+    html+='<div class="hours-row"><label for="ses-qty-input">Blocks (3 months each):</label>';
+    html+='<input type="number" id="ses-qty-input" min="0" max="4" step="1" value="'+sesVal+'" style="width:60px" oninput="onSesChange(parseInt(this.value,10)||0)">';
+    html+='<span class="hours-total" id="ses-total-display">'+sesTotal+'</span></div>';
+    html+='<div style="margin-top:6px"><span class="dk-inline"><input type="checkbox" id="ses-onetime" '+(state.sesOneTime?'checked':'')+' onchange="onSesOneTimeChange(this.checked)"><label for="ses-onetime">One-time scope (don\'t multiply by contract years)</label></span></div>';
+    html+='<div class="addon-note">1 block = 3 months of Engagement Manager support (max 4 blocks per year = 12 months).</div>';
+    html+='<div class="warn-hours" id="warn-ses"></div>';
+    html+='</div></div>';
+  }
+  document.getElementById('addon-list').innerHTML=html;
+  onExpertHrsChange(hrsVal,true);
+  onSesChange(state.sesQty||0,true);
 }
 
+function expertHrsAmount(){
+  if(!state.expertHrs)return 0;
+  var mult=state.expertHrsOneTime?1:state.contractYears;
+  return state.expertHrs*RATES.expertHr*mult;
+}
+function sesAmount(){
+  if(!state.sesQty||state.pkg==='elite')return 0;
+  var mult=state.sesOneTime?1:state.contractYears;
+  return state.sesQty*RATES.sesBlock*mult;
+}
+function onExpertHrsInput(raw){var v=parseInt(raw,10)||0;state.expertHrsManual=true;onExpertHrsChange(v,false);}
 function onExpertHrsChange(v,silent){
-state.expertHrs=v;
-var disp=document.getElementById('hrs-total-display');if(disp)disp.textContent=v>0?'$'+(v*450).toLocaleString():'--';
-if(warnTimer)clearTimeout(warnTimer);
-warnTimer=setTimeout(function(){var warn=document.getElementById('warn-hrs');if(warn){var threshold=(state.pkg==='plus')?5:50;warn.style.display=(v>threshold)?'block':'none';}},300);
-if(!silent)saveState();
+  state.expertHrs=v;
+  var disp=document.getElementById('hrs-total-display');if(disp)disp.textContent=v>0?money(expertHrsAmount()):'--';
+  if(warnTimer)clearTimeout(warnTimer);
+  warnTimer=setTimeout(function(){
+    var warn=document.getElementById('warn-hrs');if(!warn)return;
+    if(state.pkg==='plus'&&v>PLUS_HOURS_LIMIT){warn.style.display='block';warn.textContent='More than '+PLUS_HOURS_LIMIT+' hours on a Plus package needs PS leadership validation before including this.';}
+    else if(state.pkg!=='plus'&&v>NONPLUS_HOURS_WARN){warn.style.display='block';warn.textContent='More than '+NONPLUS_HOURS_WARN+' hours on a '+PKGS[state.pkg].name+' package is a large scope. Confirm the estimate with PS before sending.';}
+    else{warn.style.display='none';}
+  },300);
+  if(!silent)saveState();
+}
+function onExpertHrsOneTimeChange(v){
+  state.expertHrsOneTime=!!v;
+  var disp=document.getElementById('hrs-total-display');if(disp)disp.textContent=state.expertHrs>0?money(expertHrsAmount()):'--';
+  saveState();
 }
 function onSesChange(v,silent){
-state.sesQty=v;
-var disp=document.getElementById('ses-total-display');if(disp)disp.textContent=v>0?'$'+(v*20000).toLocaleString():'--';
-var warn=document.getElementById('warn-ses');
-if(warn)warn.style.display=(state.pkg==='plus'&&v>0)?'block':'none';
-if(!silent)saveState();
+  state.sesQty=v;
+  var disp=document.getElementById('ses-total-display');if(disp)disp.textContent=v>0?money(sesAmount()):'--';
+  var warn=document.getElementById('warn-ses');
+  if(warn){if(state.pkg==='plus'&&v>0){warn.style.display='block';warn.textContent='Adding SES to a Plus deal needs PS leadership validation before including this.';}else{warn.style.display='none';}}
+  if(!silent)saveState();
+}
+function onSesOneTimeChange(v){
+  state.sesOneTime=!!v;
+  var disp=document.getElementById('ses-total-display');if(disp)disp.textContent=state.sesQty>0?money(sesAmount()):'--';
+  saveState();
+}
+
+function addonsTotal(){return expertHrsAmount()+sesAmount();}
+function grandTotal(){return Math.round(calcPrice(state.pkg))*state.contractYears+addonsTotal();}
+/* The next tier worth presenting side by side, or null. */
+function comparisonTarget(){
+  var order=['essentials','plus','advanced','elite'];
+  var idx=order.indexOf(state.pkg);
+  if(idx===-1)return null; /* invalid/unset package */
+  var next=order[idx+1];
+  if(!next||!UPGRADE_DIFFS[state.pkg+'-'+next])return null;
+  if(getEligiblePkgs().indexOf(next)===-1)return null;
+  return next;
 }
 
 function updateMultiYear(y){
-state.contractYears=parseInt(y)||1;
-document.getElementById('sum-years').value=y;
-var basePrice=calcPrice(state.pkg);
-var recurring=Math.round(basePrice)*state.contractYears;
-var oneTime=0;
-if(state.expertHrs>0)oneTime+=state.expertHrs*450;
-if(state.sesQty>0&&state.pkg!=='elite')oneTime+=state.sesQty*20000;
-var total=recurring+oneTime;
-document.getElementById('total-year-label').textContent=state.contractYears>1?('('+state.contractYears+'-year total)'):'(Year 1)';
-var note='';
-if(state.contractYears>1){note='Package fee x '+state.contractYears+' years ($'+recurring.toLocaleString()+')';if(oneTime>0)note+=' plus one-time add-ons ($'+oneTime.toLocaleString()+')';}
-document.getElementById('multi-year-note').textContent=note;
-document.getElementById('total-price-display').textContent='$'+total.toLocaleString();
-saveState();
+  state.contractYears=parseInt(y,10)||1;
+  document.getElementById('sum-years').value=state.contractYears;
+  var recurring=Math.round(calcPrice(state.pkg))*state.contractYears;
+  var addons=addonsTotal();
+  document.getElementById('total-year-label').textContent=state.contractYears>1?('('+state.contractYears+'-year total)'):'(Year 1)';
+  var note='';
+  if(state.contractYears>1){
+    note='Package fee x '+state.contractYears+' years ('+money(recurring)+'). Expert Hours and SES also multiply by contract length by default; tick "One-time" on the add-on to hold it flat.';
+  }else{
+    note='Package fee is annual. Expert Hours and SES default to recurring at multi-year, one-time toggle available per add-on.';
+  }
+  document.getElementById('multi-year-note').textContent=note;
+  document.getElementById('total-price-display').textContent=money(recurring+addons);
+  /* refresh inline add-on totals since the multiplier changed */
+  var hd=document.getElementById('hrs-total-display');if(hd)hd.textContent=state.expertHrs>0?money(expertHrsAmount()):'--';
+  var sd=document.getElementById('ses-total-display');if(sd)sd.textContent=state.sesQty>0?money(sesAmount()):'--';
+  /* refresh Step 4 line items with the new multiplier */
+  renderSummaryAddonLines();
+  saveState();
 }
 
+function needsValidation(){
+  var reasons=[];
+  if(state.pkg==='plus'&&state.expertHrs>PLUS_HOURS_LIMIT)reasons.push('Expert Hours >'+PLUS_HOURS_LIMIT+' on Plus');
+  if(state.pkg==='plus'&&state.sesQty>0)reasons.push('SES added to Plus');
+  if(state.pkg!=='plus'&&state.pkg!=='essentials'&&state.expertHrs>NONPLUS_HOURS_WARN)reasons.push('Expert Hours >'+NONPLUS_HOURS_WARN+' on '+PKGS[state.pkg].name);
+  if(state.arr<25000&&state.pkg==='plus')reasons.push('Plus selected below $25K ARR');
+  if(state.hasLumen&&state.lumenTier==='unknown')reasons.push('Lumen tier not yet identified');
+  return reasons;
+}
+/* Deals PS must see before the client does. These force required-send UI.
+   Separate from needsValidation, which is soft flags that auto-check the Slack ping. */
+function requiresPSSend(){
+  var reasons=[];
+  if(state.isMigration)reasons.push('migration');
+  if(state.isGlobal)reasons.push('global rollout');
+  if(state.isRegulated)reasons.push('regulated industry');
+  if(state.hasLumen&&state.arr<25000)reasons.push('Lumen below $25K ARR floor');
+  if(state.pkg==='elite')reasons.push('Elite package');
+  return reasons;
+}
 function updateValidationUI(){
-var needsValidation=(state.pkg==='plus'&&(state.expertHrs>5||state.sesQty>0));
-var note=document.getElementById('ps-validation-note');
-var chk=document.getElementById('ps-alert-check');
-if(!note||!chk)return;
-if(needsValidation){note.style.display='inline';chk.checked=true;chk.disabled=true;}
-else{note.style.display='none';chk.disabled=false;}
+  var softReasons=needsValidation();var hardReasons=requiresPSSend();
+  var need=softReasons.length>0;var required=hardReasons.length>0;
+  var note=document.getElementById('ps-validation-note');
+  var chk=document.getElementById('ps-alert-check');
+  var banner=document.getElementById('ps-required-banner');
+  var btn=document.getElementById('sendps-btn');
+  if(!note||!chk)return;
+  if(required){
+    if(banner){banner.style.display='block';banner.innerHTML='<i class="ti ti-alert-circle" aria-hidden="true"></i> <b>PS review required for this scope:</b> '+esc(hardReasons.join(', '))+'. Please send when ready, PS reviews within 2 business days.';}
+    chk.checked=true;chk.disabled=true;
+    note.style.display='none';
+    if(btn)btn.innerHTML='<i class="ti ti-send" aria-hidden="true"></i> Send to PS (required)';
+  }else{
+    if(banner)banner.style.display='none';
+    if(need){note.style.display='inline';chk.checked=true;chk.disabled=true;}
+    else{note.style.display='none';chk.disabled=false;}
+    if(btn)btn.innerHTML='<i class="ti ti-send" aria-hidden="true"></i> Send to PS';
+  }
+}
+
+function renderSummaryAddonLines(){
+  var k=state.pkg;var isElite=k==='elite';var yrs=state.contractYears;
+  var target=document.getElementById('sum-addons-content');
+  if(!target)return;
+  var html='';
+  if(isElite){
+    html+='<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between"><span>Strategic Engagement Services <span class="sku-chip">PS_SES</span></span><span style="color:#012B3A;font-weight:500">Included</span></div>';
+  }
+  if(state.expertHrs>0){
+    var hUnit=state.expertHrs*RATES.expertHr;
+    var hMult=state.expertHrsOneTime?1:yrs;
+    var hLbl='Expert Hours '+state.expertHrs+'h';
+    if(hMult>1)hLbl+=' x '+hMult+' yrs';
+    if(state.expertHrsOneTime&&yrs>1)hLbl+=' (one-time)';
+    html+='<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between;border-top:0.5px solid rgba(0,0,0,0.08)"><span>'+hLbl+' <span class="sku-chip">PS_EXPERT_HRS</span></span><span style="color:#FF4C46;font-weight:500">'+money(hUnit*hMult)+'</span></div>';
+  }
+  if(!isElite&&state.sesQty>0){
+    var sUnit=state.sesQty*RATES.sesBlock;
+    var sMult=state.sesOneTime?1:yrs;
+    var sLbl='SES '+state.sesQty+' block(s)';
+    if(sMult>1)sLbl+=' x '+sMult+' yrs';
+    if(state.sesOneTime&&yrs>1)sLbl+=' (one-time)';
+    html+='<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between;border-top:0.5px solid rgba(0,0,0,0.08)"><span>'+sLbl+' <span class="sku-chip">PS_SES</span></span><span style="color:#FF4C46;font-weight:500">'+money(sUnit*sMult)+'</span></div>';
+  }
+  if(!html)html='<div class="muted" style="padding:8px 0;font-size:13px">No add-ons selected.</div>';
+  target.innerHTML=html;
 }
 
 function renderSummary(){
-var k=state.pkg;var p=PKGS[k];var basePrice=calcPrice(k);var isElite=k==='elite';
-document.getElementById('ph-title').textContent=(state.clientName||'Client')+' - Services Proposal';
-var sub=[];if(state.oppName)sub.push(state.oppName);sub.push(p.name+' package');
-document.getElementById('ph-sub').textContent=sub.join('  -  ');
-document.getElementById('sum-pkg-name').textContent=p.name+' Package';
-document.getElementById('sum-sku').innerHTML='SKU: <span class="sku-chip">'+p.sku+'</span>';
-document.getElementById('sum-base-price').textContent='$'+Math.round(basePrice).toLocaleString();
-renderDeliverables(k);
-document.getElementById('sum-deliverables').innerHTML=document.getElementById('deliverables-content').innerHTML;
-var addonsHtml='';
-if(isElite)addonsHtml+='<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between"><span>Strategic Engagement Services <span class="sku-chip">PS_SES</span></span><span style="color:#012B3A;font-weight:500">Included</span></div>';
-if(state.expertHrs>0)addonsHtml+='<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))"><span>Expert Hours '+state.expertHrs+'h <span class="sku-chip">PS_EXPERT_HRS</span></span><span style="color:#FF4C46;font-weight:500">$'+(state.expertHrs*450).toLocaleString()+'</span></div>';
-if(!isElite&&state.sesQty>0)addonsHtml+='<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))"><span>SES '+state.sesQty+' block(s) <span class="sku-chip">PS_SES</span></span><span style="color:#FF4C46;font-weight:500">$'+(state.sesQty*20000).toLocaleString()+'</span></div>';
-if(!addonsHtml)addonsHtml='<div class="muted" style="padding:8px 0;font-size:13px">No add-ons selected.</div>';
-document.getElementById('sum-addons-content').innerHTML=addonsHtml;
-var pctAmt=state.arr*p.pct;var bHtml='';
-if(p.pct>0){
-bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>'+p.name+' flat minimum</span><span>$'+p.flat.toLocaleString()+'</span></div>';
-bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>'+(p.pct*100).toFixed(0)+'% of tech ARR ($'+Math.round(state.arr).toLocaleString()+')</span><span>$'+Math.round(pctAmt).toLocaleString()+'</span></div>';
-bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:var(--color-text-secondary,#666)"><span>Package price (greater of above)</span><span>$'+Math.round(basePrice).toLocaleString()+'</span></div>';
-}else{
-bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>Essentials flat fee</span><span>$'+p.flat.toLocaleString()+'</span></div>';
-}
-document.getElementById('price-breakdown').innerHTML=bHtml;
-document.getElementById('sum-years').value=state.contractYears;
-updateMultiYear(state.contractYears);
-renderGantt();
-updateValidationUI();
+  var k=state.pkg;var p=PKGS[k];var basePrice=calcPrice(k);var isElite=k==='elite';
+  document.getElementById('ph-title').textContent=(state.clientName||'Client')+' - Services Proposal';
+  var sub=[];if(state.oppName)sub.push(state.oppName);sub.push(p.name+' package');
+  document.getElementById('ph-sub').textContent=sub.join('  -  ');
+  document.getElementById('sum-pkg-name').textContent=p.name+' Package';
+  document.getElementById('sum-sku').innerHTML='SKU: <span class="sku-chip">'+esc(p.sku)+'</span>';
+  document.getElementById('sum-base-price').textContent=money(basePrice);
+  renderDeliverables(k);
+  document.getElementById('sum-deliverables').innerHTML=document.getElementById('deliverables-content').innerHTML;
+  var tt=TALKTRACKS[k]||[];var ttHtml='';
+  for(var ti=0;ti<tt.length;ti++)ttHtml+='<div class="del-item">'+esc(tt[ti])+'</div>';
+  document.getElementById('sum-talktrack').innerHTML=ttHtml;
+  var cmpWrap=document.getElementById('cmp-toggle-wrap');
+  if(cmpWrap)cmpWrap.style.display=comparisonTarget()?'flex':'none';
+  renderSummaryAddonLines();
+  var pctAmt=state.arr*p.pct;var bHtml='';
+  if(p.pct>0){
+    bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>'+esc(p.name)+' flat minimum</span><span>'+money(p.flat)+'</span></div>';
+    bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>'+(p.pct*100).toFixed(0)+'% of tech ARR ('+money(state.arr)+')</span><span>'+money(pctAmt)+'</span></div>';
+    bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:var(--color-text-secondary,#666)"><span>Package price (greater of above)</span><span>'+money(basePrice)+'</span></div>';
+  }else{
+    bHtml+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px"><span>Essentials flat fee</span><span>'+money(p.flat)+'</span></div>';
+  }
+  document.getElementById('price-breakdown').innerHTML=bHtml;
+  document.getElementById('sum-years').value=state.contractYears;
+  updateMultiYear(state.contractYears);
+  var lead=LEAD_TIME[state.region]||LEAD_TIME[''];
+  var leadTxt='Typical PS start lead time for '+(state.region||'this region')+': '+lead+' after signature, subject to scheduling.';
+  if(state.deliveryLang&&state.deliveryLang!=='English')leadTxt+=' Delivery language is '+state.deliveryLang+', which may extend lead time depending on consultant availability.';
+  document.getElementById('lead-note').textContent=leadTxt;
+  var vn=document.getElementById('validity-note');
+  if(vn)vn.textContent='Estimate valid until '+validityDate()+', subject to PS confirmation.';
+  renderGantt();
+  updateValidationUI();
 }
 
 function getTimelineConfig(){
-var k=state.pkg;var hs=state.hsProducts;var hasTW=state.hasTW;
-var hasInbox=hs.inbox.on,hasAnalytics=hs.analytics.on,hasListening=hs.listening.on,hasAmplify=hs.amplify.on;
-var hasAnyHS=hs.hse.on||hasInbox||hasAnalytics||hasListening||hasAmplify;
-var isEliteAdv=k==='elite'||k==='advanced';
-if(!hasAnyHS&&hasTW){
-return{cols:10,colLabels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10+'],rows:[
-{section:'Joint',label:'Kickoff call',owner:'',bars:[{col:0,span:1,type:'joint'}]},
-{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:9,type:'ongoing'}]},
-{section:'Client',label:'Requirements review session',owner:'Client',bars:[{col:1,span:2,type:'client'}]},
-{section:'Client',label:'Connect social tokens',owner:'Client',bars:[{col:1,span:1,type:'client'}]},
-{section:'Hootsuite',label:'TW launch configuration',owner:'Hootsuite',bars:[{col:2,span:3,type:'hs'}]},
-{section:'Training',label:'Data analysis webinar',owner:'Training',bars:[{col:3,span:1,type:'training'}]},
-{section:'Training',label:'Data customization session',owner:'Training',bars:[{col:4,span:1,type:'training'}]},
-{section:'Training',label:'Admin training',owner:'Training',bars:[{col:5,span:1,type:'training'}]},
-{section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:5,span:1,type:'joint'}]},
-{section:'Hootsuite',label:'Advanced features config',owner:'Hootsuite',bars:[{col:6,span:2,type:'hs'}]},
-{section:'Hootsuite',label:'Optimization',owner:'Hootsuite',bars:[{col:7,span:2,type:'hs'}]}
-]};
-}
-if(hasAnyHS&&!hasTW&&(k==='essentials'||k==='plus')){
-var rows=[{section:'Joint',label:'Kickoff',owner:'',bars:[{col:0,span:1,type:'joint'}]},{section:'Client',label:'Connect social accounts',owner:'Client',bars:[{col:0,span:1,type:'client'}]},{section:'Client',label:'HSE requirements gathering',owner:'Client',bars:[{col:0,span:2,type:'client'}]},{section:'Hootsuite',label:'Configure users and permissions',owner:'Hootsuite',bars:[{col:1,span:2,type:'hs'}]}];
-if(hasAnalytics)rows.push({section:'Hootsuite',label:'Analytics configuration',owner:'Hootsuite',bars:[{col:1,span:2,type:'hs'}]});
-if(hasListening)rows.push({section:'Hootsuite',label:'Listening configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
-if(hasInbox)rows.push({section:'Hootsuite',label:'Inbox configuration',owner:'Hootsuite',bars:[{col:1,span:2,type:'hs'}]});
-rows.push({section:'Training',label:'HSE admin training',owner:'Training',bars:[{col:1,span:1,type:'training'}]});
-if(hasAnalytics)rows.push({section:'Training',label:'Analytics admin training',owner:'Training',bars:[{col:2,span:1,type:'training'}]});
-rows.push({section:'Training',label:'End-user enablement (digital)',owner:'Training',bars:[{col:3,span:2,type:'training'}]});
-rows.push({section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:3,span:1,type:'joint'}]});
-rows.push({section:'Ongoing',label:'Comms plan and feedback collection',owner:'',bars:[{col:4,span:3,type:'ongoing'}]});
-return{cols:7,colLabels:['W1','W2','W3','W4','Month 2','Month 3','Ongoing'],rows:rows};
-}
-if(hasAnyHS&&!hasTW&&isEliteAdv){
-var rows=[{section:'Joint',label:'Kickoff',owner:'',bars:[{col:0,span:1,type:'joint'}]},{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:9,type:'ongoing'}]},{section:'Client',label:'Requirements gathering',owner:'Client',bars:[{col:0,span:2,type:'client'}]},{section:'Client',label:'Connect social accounts',owner:'Client',bars:[{col:0,span:1,type:'client'}]},{section:'Hootsuite',label:'Configure users and permissions',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]}];
-if(hasAnalytics)rows.push({section:'Hootsuite',label:'Analytics configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
-if(hasListening)rows.push({section:'Hootsuite',label:'Listening configuration',owner:'Hootsuite',bars:[{col:2,span:3,type:'hs'}]});
-if(hasInbox)rows.push({section:'Hootsuite',label:'Inbox configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
-if(hasAmplify)rows.push({section:'Hootsuite',label:'Amplify strategy plus user config',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]});
-rows.push({section:'Training',label:'HSE admin training',owner:'Training',bars:[{col:1,span:1,type:'training'}]});
-if(hasAnalytics)rows.push({section:'Training',label:'Analytics admin training',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
-if(hasInbox)rows.push({section:'Training',label:'Inbox admin training',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
-if(hasListening)rows.push({section:'Training',label:'Listening admin training',owner:'Training',bars:[{col:4,span:1,type:'training'}]});
-rows.push({section:'Training',label:'End-user training (live sessions)',owner:'Training',bars:[{col:4,span:2,type:'training'}]});
-rows.push({section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:5,span:2,type:'joint'}]});
-rows.push({section:'Ongoing',label:'Office hours and feedback',owner:'',bars:[{col:7,span:3,type:'ongoing'}]});
-return{cols:10,colLabels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10+'],rows:rows};
-}
-if(hasAnyHS&&hasTW&&(k==='plus'||k==='advanced')){
-var rows=[{section:'Joint',label:'Kickoff',owner:'',bars:[{col:0,span:1,type:'joint'}]},{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:11,type:'ongoing'}]},{section:'Client',label:'Connect social accounts',owner:'Client',bars:[{col:0,span:1,type:'client'}]},{section:'Client',label:'HSE requirements gathering',owner:'Client',bars:[{col:0,span:2,type:'client'}]},{section:'Client',label:'TW requirements review session',owner:'Client',bars:[{col:1,span:2,type:'client'}]},{section:'Hootsuite',label:'Configure users and permissions',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]}];
-if(hasAnalytics)rows.push({section:'Hootsuite',label:'Analytics configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
-if(hasInbox)rows.push({section:'Hootsuite',label:'Inbox configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
-if(hasListening)rows.push({section:'Hootsuite',label:'Listening configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
-rows.push({section:'Hootsuite',label:'TW launch configuration',owner:'Hootsuite',bars:[{col:2,span:3,type:'hs'}]});
-rows.push({section:'Training',label:'HSE admin training',owner:'Training',bars:[{col:1,span:1,type:'training'}]});
-if(hasAnalytics)rows.push({section:'Training',label:'Analytics training',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
-rows.push({section:'Training',label:'TW data analysis webinar',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
-rows.push({section:'Training',label:'TW data customization session',owner:'Training',bars:[{col:4,span:1,type:'training'}]});
-rows.push({section:'Training',label:'TW admin training sessions',owner:'Training',bars:[{col:5,span:1,type:'training'}]});
-rows.push({section:'Training',label:'End-user training',owner:'Training',bars:[{col:5,span:2,type:'training'}]});
-rows.push({section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:6,span:2,type:'joint'}]});
-rows.push({section:'Ongoing',label:'Office hours and feedback',owner:'',bars:[{col:9,span:3,type:'ongoing'}]});
-return{cols:12,colLabels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12+'],rows:rows};
-}
-return{cols:8,colLabels:['Month 1','Month 2','Month 3','Month 4','Month 5','Month 6','Month 7','Ongoing'],rows:[
-{section:'Joint',label:'Kickoff and accounts provisioned',owner:'',bars:[{col:0,span:1,type:'joint'}]},
-{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:7,type:'ongoing'}]},
-{section:'Phase 1 Planning',label:'Stakeholder and scope alignment',owner:'Client + EM',bars:[{col:0,span:2,type:'client'}]},
-{section:'Phase 1 Planning',label:'Requirements gathering',owner:'Client + TAM',bars:[{col:0,span:2,type:'client'}]},
-{section:'Phase 1 Planning',label:'Training roadmap',owner:'Training Lead',bars:[{col:0,span:2,type:'hs'}]},
-{section:'Phase 2/3 Setup and Launch',label:'Teams, permissions and config',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]},
-{section:'Phase 2/3 Setup and Launch',label:'TW launch configuration',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]},
-{section:'Phase 2/3 Setup and Launch',label:'Tailored admin enablement',owner:'Training',bars:[{col:2,span:1,type:'training'}]},
-{section:'Phase 2/3 Setup and Launch',label:'Role-based end-user training',owner:'Training',bars:[{col:2,span:3,type:'training'}]},
-{section:'Phase 2/3 Setup and Launch',label:'Launch parties and office hours',owner:'Joint',bars:[{col:3,span:2,type:'joint'}]},
-{section:'Phase 4 Monitor',label:'Feedback collection and optimization',owner:'Joint',bars:[{col:4,span:2,type:'joint'}]},
-{section:'Phase 4 Monitor',label:'Reinforcement strategies',owner:'Hootsuite',bars:[{col:4,span:2,type:'hs'}]},
-{section:'Phase 5 BAU',label:'Ongoing expert hours and optimization',owner:'',bars:[{col:6,span:2,type:'ongoing'}]}
-]};
+  var k=state.pkg;var hs=state.hsProducts;var hasLumen=state.hasLumen;
+  var hasNest=hs.nest.on,hasAnalytics=hs.analytics.on,hasLumenLite=hs.lumenLite.on,hasParliament=hs.parliament.on;
+  var hasAnyHS=hs.perch.on||hasNest||hasAnalytics||hasLumenLite||hasParliament;
+  var isEliteAdv=k==='elite'||k==='advanced';
+  if(!hasAnyHS&&hasLumen){
+    return{cols:10,colLabels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10+'],rows:[
+      {section:'Joint',label:'Kickoff call',owner:'',bars:[{col:0,span:1,type:'joint'}]},
+      {section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:9,type:'ongoing'}]},
+      {section:'Client',label:'Requirements review session',owner:'Client',bars:[{col:1,span:2,type:'client'}]},
+      {section:'Client',label:'Connect social tokens',owner:'Client',bars:[{col:1,span:1,type:'client'}]},
+      {section:'Hootsuite',label:'TW launch configuration',owner:'Hootsuite',bars:[{col:2,span:3,type:'hs'}]},
+      {section:'Training',label:'Data analysis webinar',owner:'Training',bars:[{col:3,span:1,type:'training'}]},
+      {section:'Training',label:'Data customization session',owner:'Training',bars:[{col:4,span:1,type:'training'}]},
+      {section:'Training',label:'Admin training',owner:'Training',bars:[{col:5,span:1,type:'training'}]},
+      {section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:5,span:1,type:'joint'}]},
+      {section:'Hootsuite',label:'Advanced features config',owner:'Hootsuite',bars:[{col:6,span:2,type:'hs'}]},
+      {section:'Hootsuite',label:'Optimization',owner:'Hootsuite',bars:[{col:7,span:2,type:'hs'}]}
+    ]};
+  }
+  if(hasAnyHS&&!hasLumen&&(k==='essentials'||k==='plus')){
+    var rows=[{section:'Joint',label:'Kickoff',owner:'',bars:[{col:0,span:1,type:'joint'}]},{section:'Client',label:'Connect social accounts',owner:'Client',bars:[{col:0,span:1,type:'client'}]},{section:'Client',label:'Perch requirements gathering',owner:'Client',bars:[{col:0,span:2,type:'client'}]},{section:'Hootsuite',label:'Configure users and permissions',owner:'Hootsuite',bars:[{col:1,span:2,type:'hs'}]}];
+    if(hasAnalytics)rows.push({section:'Hootsuite',label:'Analytics configuration',owner:'Hootsuite',bars:[{col:1,span:2,type:'hs'}]});
+    if(hasLumenLite)rows.push({section:'Hootsuite',label:'Lumen lite configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+    if(hasNest)rows.push({section:'Hootsuite',label:'Nest configuration',owner:'Hootsuite',bars:[{col:1,span:2,type:'hs'}]});
+    rows.push({section:'Training',label:'Perch admin training',owner:'Training',bars:[{col:1,span:1,type:'training'}]});
+    if(hasAnalytics)rows.push({section:'Training',label:'Analytics admin training',owner:'Training',bars:[{col:2,span:1,type:'training'}]});
+    rows.push({section:'Training',label:'End-user enablement (digital)',owner:'Training',bars:[{col:3,span:2,type:'training'}]});
+    rows.push({section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:3,span:1,type:'joint'}]});
+    rows.push({section:'Ongoing',label:'Comms plan and feedback collection',owner:'',bars:[{col:4,span:3,type:'ongoing'}]});
+    return{cols:7,colLabels:['W1','W2','W3','W4','Month 2','Month 3','Ongoing'],rows:rows};
+  }
+  if(hasAnyHS&&!hasLumen&&isEliteAdv){
+    var rows2=[{section:'Joint',label:'Kickoff',owner:'',bars:[{col:0,span:1,type:'joint'}]},{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:9,type:'ongoing'}]},{section:'Client',label:'Requirements gathering',owner:'Client',bars:[{col:0,span:2,type:'client'}]},{section:'Client',label:'Connect social accounts',owner:'Client',bars:[{col:0,span:1,type:'client'}]},{section:'Hootsuite',label:'Configure users and permissions',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]}];
+    if(hasAnalytics)rows2.push({section:'Hootsuite',label:'Analytics configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+    if(hasLumenLite)rows2.push({section:'Hootsuite',label:'Lumen lite configuration',owner:'Hootsuite',bars:[{col:2,span:3,type:'hs'}]});
+    if(hasNest)rows2.push({section:'Hootsuite',label:'Nest configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+    if(hasParliament)rows2.push({section:'Hootsuite',label:'Parliament strategy plus user config',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]});
+    rows2.push({section:'Training',label:'Perch admin training',owner:'Training',bars:[{col:1,span:1,type:'training'}]});
+    if(hasAnalytics)rows2.push({section:'Training',label:'Analytics admin training',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
+    if(hasNest)rows2.push({section:'Training',label:'Nest admin training',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
+    if(hasLumenLite)rows2.push({section:'Training',label:'Lumen lite admin training',owner:'Training',bars:[{col:4,span:1,type:'training'}]});
+    rows2.push({section:'Training',label:'End-user training (live sessions)',owner:'Training',bars:[{col:4,span:2,type:'training'}]});
+    rows2.push({section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:5,span:2,type:'joint'}]});
+    rows2.push({section:'Ongoing',label:'Office hours and feedback',owner:'',bars:[{col:7,span:3,type:'ongoing'}]});
+    return{cols:10,colLabels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10+'],rows:rows2};
+  }
+  if(hasAnyHS&&hasLumen&&(k==='plus'||k==='advanced')){
+    var rows3=[{section:'Joint',label:'Kickoff',owner:'',bars:[{col:0,span:1,type:'joint'}]},{section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:11,type:'ongoing'}]},{section:'Client',label:'Connect social accounts',owner:'Client',bars:[{col:0,span:1,type:'client'}]},{section:'Client',label:'Perch requirements gathering',owner:'Client',bars:[{col:0,span:2,type:'client'}]},{section:'Client',label:'Lumen requirements review session',owner:'Client',bars:[{col:1,span:2,type:'client'}]},{section:'Hootsuite',label:'Configure users and permissions',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]}];
+    if(hasAnalytics)rows3.push({section:'Hootsuite',label:'Analytics configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+    if(hasNest)rows3.push({section:'Hootsuite',label:'Nest configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+    if(hasLumenLite)rows3.push({section:'Hootsuite',label:'Lumen lite configuration',owner:'Hootsuite',bars:[{col:2,span:2,type:'hs'}]});
+    rows3.push({section:'Hootsuite',label:'TW launch configuration',owner:'Hootsuite',bars:[{col:2,span:3,type:'hs'}]});
+    rows3.push({section:'Training',label:'Perch admin training',owner:'Training',bars:[{col:1,span:1,type:'training'}]});
+    if(hasAnalytics)rows3.push({section:'Training',label:'Analytics training',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
+    rows3.push({section:'Training',label:'TW data analysis webinar',owner:'Training',bars:[{col:3,span:1,type:'training'}]});
+    rows3.push({section:'Training',label:'TW data customization session',owner:'Training',bars:[{col:4,span:1,type:'training'}]});
+    rows3.push({section:'Training',label:'TW admin training sessions',owner:'Training',bars:[{col:5,span:1,type:'training'}]});
+    rows3.push({section:'Training',label:'End-user training',owner:'Training',bars:[{col:5,span:2,type:'training'}]});
+    rows3.push({section:'Joint',label:'Testing and validation',owner:'Joint',bars:[{col:6,span:2,type:'joint'}]});
+    rows3.push({section:'Ongoing',label:'Office hours and feedback',owner:'',bars:[{col:9,span:3,type:'ongoing'}]});
+    return{cols:12,colLabels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12+'],rows:rows3};
+  }
+  return{cols:8,colLabels:['Month 1','Month 2','Month 3','Month 4','Month 5','Month 6','Month 7','Ongoing'],rows:[
+    {section:'Joint',label:'Kickoff and accounts provisioned',owner:'',bars:[{col:0,span:1,type:'joint'}]},
+    {section:'Joint',label:'Weekly syncs',owner:'',bars:[{col:0,span:7,type:'ongoing'}]},
+    {section:'Phase 1 Planning',label:'Stakeholder and scope alignment',owner:'Client + EM',bars:[{col:0,span:2,type:'client'}]},
+    {section:'Phase 1 Planning',label:'Requirements gathering',owner:'Client + TAM',bars:[{col:0,span:2,type:'client'}]},
+    {section:'Phase 1 Planning',label:'Training roadmap',owner:'Training Lead',bars:[{col:0,span:2,type:'hs'}]},
+    {section:'Phase 2/3 Setup and Launch',label:'Teams, permissions and config',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]},
+    {section:'Phase 2/3 Setup and Launch',label:'TW launch configuration',owner:'Hootsuite',bars:[{col:1,span:3,type:'hs'}]},
+    {section:'Phase 2/3 Setup and Launch',label:'Tailored admin enablement',owner:'Training',bars:[{col:2,span:1,type:'training'}]},
+    {section:'Phase 2/3 Setup and Launch',label:'Role-based end-user training',owner:'Training',bars:[{col:2,span:3,type:'training'}]},
+    {section:'Phase 2/3 Setup and Launch',label:'Launch parties and office hours',owner:'Joint',bars:[{col:3,span:2,type:'joint'}]},
+    {section:'Phase 4 Monitor',label:'Feedback collection and optimization',owner:'Joint',bars:[{col:4,span:2,type:'joint'}]},
+    {section:'Phase 4 Monitor',label:'Reinforcement strategies',owner:'Hootsuite',bars:[{col:4,span:2,type:'hs'}]},
+    {section:'Phase 5 BAU',label:'Ongoing expert hours and optimization',owner:'',bars:[{col:6,span:2,type:'ongoing'}]}
+  ]};
 }
 
 function renderGantt(){
-var cfg=getTimelineConfig();var cols=cfg.cols;var colLabels=cfg.colLabels;var rows=cfg.rows;
-var labelW=170;var cellW=Math.max(42,Math.floor((660-labelW)/cols));var totalW=labelW+cols*cellW;
-var gridCols=labelW+'px repeat('+cols+','+cellW+'px)';
-var html='<div style="min-width:'+totalW+'px">';
-html+='<div style="display:grid;grid-template-columns:'+gridCols+';background:#012B3A;border-radius:8px 8px 0 0"><div class="gantt-header-label">Activity</div>';
-for(var c=0;c<colLabels.length;c++){html+='<div class="gantt-header-cell">'+colLabels[c]+'</div>';}
-html+='</div>';
-var lastSection='';
-for(var r=0;r<rows.length;r++){
-var row=rows[r];
-if(row.section!==lastSection){html+='<div style="display:grid;grid-template-columns:'+gridCols+'"><div class="gantt-section" style="grid-column:1/-1">'+row.section+'</div></div>';lastSection=row.section;}
-html+='<div class="gantt-row" style="display:grid;grid-template-columns:'+gridCols+'"><div class="gantt-row-label">'+row.label+(row.owner?'<span class="owner">'+row.owner+'</span>':'')+'</div>';
-var col=0;
-while(col<cols){
-var bar=null;
-for(var bi=0;bi<row.bars.length;bi++){if(row.bars[bi].col===col){bar=row.bars[bi];break;}}
-if(bar){var span=Math.min(bar.span,cols-col);html+='<div class="gantt-cell" style="grid-column:span '+span+'"><div class="gantt-bar bar-'+bar.type+'"></div></div>';col+=span;}
-else{html+='<div class="gantt-cell"></div>';col++;}
-}
-html+='</div>';
-}
-html+='<div class="gantt-footer">Graduation - handover to AM/CSM</div></div>';
-document.getElementById('gantt-container').innerHTML=html;
-document.getElementById('gantt-legend').innerHTML='<div class="gantt-legend-item"><div class="gantt-legend-dot bar-hs"></div>Hootsuite action</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-client"></div>Client action</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-joint"></div>Joint accountability</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-training"></div>Training session</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-ongoing"></div>Ongoing</div>';
+  var cfg=getTimelineConfig();var cols=cfg.cols;var colLabels=cfg.colLabels;var rows=cfg.rows;
+  var labelW=170;var cellW=Math.max(42,Math.floor((660-labelW)/cols));var totalW=labelW+cols*cellW;
+  var gridCols=labelW+'px repeat('+cols+','+cellW+'px)';
+  var html='<div style="min-width:'+totalW+'px">';
+  html+='<div style="display:grid;grid-template-columns:'+gridCols+';background:#012B3A;border-radius:8px 8px 0 0"><div class="gantt-header-label">Activity</div>';
+  for(var c=0;c<colLabels.length;c++)html+='<div class="gantt-header-cell">'+esc(colLabels[c])+'</div>';
+  html+='</div>';
+  var lastSection='';
+  for(var r=0;r<rows.length;r++){
+    var row=rows[r];
+    if(row.section!==lastSection){html+='<div style="display:grid;grid-template-columns:'+gridCols+'"><div class="gantt-section" style="grid-column:1/-1">'+esc(row.section)+'</div></div>';lastSection=row.section;}
+    html+='<div class="gantt-row" style="display:grid;grid-template-columns:'+gridCols+'"><div class="gantt-row-label">'+esc(row.label)+(row.owner?'<span class="owner">'+esc(row.owner)+'</span>':'')+'</div>';
+    var col=0;
+    while(col<cols){
+      var bar=null;
+      for(var bi=0;bi<row.bars.length;bi++){if(row.bars[bi].col===col){bar=row.bars[bi];break;}}
+      if(bar){var span=Math.min(bar.span,cols-col);html+='<div class="gantt-cell" style="grid-column:span '+span+'"><div class="gantt-bar bar-'+bar.type+'"></div></div>';col+=span;}
+      else{html+='<div class="gantt-cell"></div>';col++;}
+    }
+    html+='</div>';
+  }
+  html+='<div class="gantt-footer">Graduation - handover to AM/CSM</div></div>';
+  document.getElementById('gantt-container').innerHTML=html;
+  document.getElementById('gantt-legend').innerHTML='<div class="gantt-legend-item"><div class="gantt-legend-dot bar-hs"></div>Hootsuite action</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-client"></div>Client action</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-joint"></div>Joint accountability</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-training"></div>Training session</div><div class="gantt-legend-item"><div class="gantt-legend-dot bar-ongoing"></div>Ongoing</div>';
 }
 
+/* ---------- exports: PPTX / PDF ---------- */
 function downloadPPTX(){
-if(typeof PptxGenJS==='undefined'){alert('PPTX library still loading. Please try again.');return;}
-var btn=document.getElementById('pptx-btn');var orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='Generating...';
-setTimeout(function(){
-try{buildPPTX();}catch(e){alert('Could not generate PPTX. Please try again.');}
-btn.disabled=false;btn.innerHTML=orig;
-},50);
+  if(typeof PptxGenJS==='undefined'){alert('PPTX library still loading. Please try again.');return;}
+  var btn=document.getElementById('pptx-btn');var orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='Generating...';
+  setTimeout(function(){try{buildPPTX();}catch(e){alert('Could not generate PPTX. Please try again.');}btn.disabled=false;btn.innerHTML=orig;},50);
 }
-
 function buildPPTX(){
-var pptx=new PptxGenJS();
-var cfg=getTimelineConfig();var cols=cfg.cols;var colLabels=cfg.colLabels;var rows=cfg.rows;
-var p=PKGS[state.pkg];var basePrice=calcPrice(state.pkg);
-var BAR={hs:'FF4C46',client:'012B3A',joint:'7ec8a0',training:'f0a500',ongoing:'cce5ff'};
-var s1=pptx.addSlide();
-s1.background={color:'012B3A'};
-s1.addText((state.clientName||'Client')+' - Services Proposal',{x:0.6,y:2.2,w:8.8,h:0.8,color:'FFFFFF',fontSize:30,bold:true,fontFace:'Arial'});
-var subline=p.name+' package';if(state.oppName)subline=state.oppName+'  -  '+subline;
-s1.addText(subline,{x:0.6,y:3.1,w:8.8,h:0.4,color:'DFFFDE',fontSize:16,fontFace:'Arial'});
-s1.addText('Prepared with the Professional Services Scoping Calculator',{x:0.6,y:6.6,w:8.8,h:0.3,color:'888888',fontSize:10,fontFace:'Arial'});
-var s2=pptx.addSlide();
-s2.addShape(pptx.ShapeType.rect,{x:0,y:0,w:'100%',h:0.65,fill:{color:'012B3A'}});
-s2.addText('Scope and pricing',{x:0.2,y:0.12,w:9,h:0.4,color:'FFFFFF',fontSize:16,bold:true,fontFace:'Arial'});
-var rowsTxt=[];
-rowsTxt.push([{text:p.name+' package ('+p.sku+')',options:{bold:true}},{text:'$'+Math.round(basePrice).toLocaleString(),options:{align:'right',bold:true}}]);
-if(state.pkg==='elite')rowsTxt.push([{text:'Strategic Engagement Services (PS_SES)'},{text:'Included',options:{align:'right'}}]);
-if(state.expertHrs>0)rowsTxt.push([{text:'Expert Hours - '+state.expertHrs+'h (PS_EXPERT_HRS)'},{text:'$'+(state.expertHrs*450).toLocaleString(),options:{align:'right'}}]);
-if(state.sesQty>0&&state.pkg!=='elite')rowsTxt.push([{text:'SES - '+state.sesQty+' block(s) (PS_SES)'},{text:'$'+(state.sesQty*20000).toLocaleString(),options:{align:'right'}}]);
-var oneTime=(state.expertHrs>0?state.expertHrs*450:0)+((state.sesQty>0&&state.pkg!=='elite')?state.sesQty*20000:0);
-var total=Math.round(basePrice)*state.contractYears+oneTime;
-rowsTxt.push([{text:'Estimated total ('+state.contractYears+'-year)',options:{bold:true,color:'FF4C46'}},{text:'$'+total.toLocaleString(),options:{align:'right',bold:true,color:'FF4C46'}}]);
-s2.addTable(rowsTxt,{x:0.4,y:1.0,w:9.2,colW:[6.8,2.4],fontSize:11,fontFace:'Arial',border:{type:'solid',color:'E8E8E8',pt:0.5},rowH:0.35});
-var deliv=DELIVERABLES[state.pkg].onboarding;
-var dtext='Key deliverables: ';for(var di=0;di<deliv.length;di++){dtext+=deliv[di];if(di<deliv.length-1)dtext+=';  ';}
-s2.addText(dtext,{x:0.4,y:1.1+rowsTxt.length*0.38+0.3,w:9.2,h:1.5,color:'444444',fontSize:10,fontFace:'Arial',valign:'top'});
-var s3=pptx.addSlide();
-s3.addShape(pptx.ShapeType.rect,{x:0,y:0,w:'100%',h:0.65,fill:{color:'012B3A'}});
-s3.addText((state.clientName?state.clientName+' - ':'')+'Implementation Timeline',{x:0.2,y:0.1,w:9.2,h:0.45,color:'FFFFFF',fontSize:16,bold:true,fontFace:'Arial'});
-s3.addText('Timeline depends on client turnaround and scheduling',{x:0.2,y:0.68,w:9,h:0.2,color:'888888',fontSize:8,fontFace:'Arial',italic:true});
-var legendItems=[['FF4C46','Hootsuite'],['012B3A','Client'],['7ec8a0','Joint'],['f0a500','Training'],['cce5ff','Ongoing']];
-for(var li=0;li<legendItems.length;li++){s3.addShape(pptx.ShapeType.rect,{x:0.2+li*1.8,y:6.6,w:0.12,h:0.12,fill:{color:legendItems[li][0]}});s3.addText(legendItems[li][1],{x:0.36+li*1.8,y:6.58,w:1.4,h:0.18,fontSize:7,color:'444444',fontFace:'Arial'});}
-var gx=0.2,gy=1.0,tw=9.6,lw=1.9;var cw=(tw-lw)/cols;var rh=0.24;
-s3.addShape(pptx.ShapeType.rect,{x:gx,y:gy,w:tw,h:0.28,fill:{color:'012B3A'}});
-s3.addText('Activity',{x:gx+0.05,y:gy+0.03,w:lw,h:0.22,color:'DFFFDE',fontSize:7,bold:true,fontFace:'Arial'});
-for(var cl=0;cl<colLabels.length;cl++){s3.addText(colLabels[cl],{x:gx+lw+cl*cw,y:gy+0.03,w:cw,h:0.22,color:'DFFFDE',fontSize:6,bold:true,fontFace:'Arial',align:'center'});}
-var yo=gy+0.3;var lastSec='';
-for(var rr=0;rr<rows.length;rr++){
-var row=rows[rr];
-if(row.section!==lastSec){s3.addShape(pptx.ShapeType.rect,{x:gx,y:yo,w:tw,h:0.16,fill:{color:'F0F0F0'}});s3.addText(row.section.toUpperCase(),{x:gx+0.05,y:yo,w:tw,h:0.16,color:'888888',fontSize:5.5,bold:true,fontFace:'Arial'});yo+=0.16;lastSec=row.section;}
-s3.addText(row.label+(row.owner?' ('+row.owner+')':''),{x:gx,y:yo+0.02,w:lw-0.05,h:rh-0.04,color:'333333',fontSize:6,fontFace:'Arial',wrap:true});
-for(var bb=0;bb<row.bars.length;bb++){var b=row.bars[bb];var span=Math.min(b.span,cols-b.col);s3.addShape(pptx.ShapeType.rect,{x:gx+lw+b.col*cw+0.02,y:yo+0.04,w:span*cw-0.04,h:rh-0.1,fill:{color:BAR[b.type]||'CCCCCC'},line:{color:BAR[b.type]||'CCCCCC',width:0}});}
-yo+=rh;
-}
-s3.addShape(pptx.ShapeType.rect,{x:gx,y:yo,w:tw,h:0.24,fill:{color:'FFF0F0'},line:{color:'FF4C46',width:1}});
-s3.addText('Graduation - handover to AM/CSM',{x:gx+0.1,y:yo+0.03,w:tw,h:0.18,color:'FF4C46',fontSize:8,bold:true,fontFace:'Arial'});
-var fname=(state.clientName||'Hootsuite')+'_Services_Proposal_'+p.name;
-pptx.writeFile({fileName:fname+'.pptx'});
+  var pptx=new PptxGenJS();
+  var cfg=getTimelineConfig();var cols=cfg.cols;var colLabels=cfg.colLabels;var rows=cfg.rows;
+  var p=PKGS[state.pkg];var basePrice=calcPrice(state.pkg);
+  var BAR={hs:'FF4C46',client:'012B3A',joint:'7ec8a0',training:'f0a500',ongoing:'cce5ff'};
+  var s1=pptx.addSlide();
+  s1.background={color:'012B3A'};
+  s1.addText((state.clientName||'Client')+' - Services Proposal',{x:0.6,y:2.2,w:8.8,h:0.8,color:'FFFFFF',fontSize:30,bold:true,fontFace:'Arial'});
+  var subline=p.name+' package';if(state.oppName)subline=state.oppName+'  -  '+subline;
+  s1.addText(subline,{x:0.6,y:3.1,w:8.8,h:0.4,color:'DFFFDE',fontSize:16,fontFace:'Arial'});
+  s1.addText('Prepared with the Professional Services Scoping Calculator',{x:0.6,y:6.6,w:8.8,h:0.3,color:'888888',fontSize:10,fontFace:'Arial'});
+  var s2=pptx.addSlide();
+  s2.addShape(pptx.ShapeType.rect,{x:0,y:0,w:'100%',h:0.65,fill:{color:'012B3A'}});
+  s2.addText('Scope and pricing',{x:0.2,y:0.12,w:9,h:0.4,color:'FFFFFF',fontSize:16,bold:true,fontFace:'Arial'});
+  var rowsTxt=[];
+  rowsTxt.push([{text:p.name+' package ('+p.sku+')',options:{bold:true}},{text:money(basePrice),options:{align:'right',bold:true}}]);
+  if(state.pkg==='elite')rowsTxt.push([{text:'Strategic Engagement Services (PS_SES)'},{text:'Included',options:{align:'right'}}]);
+  if(state.expertHrs>0){
+    var hMult=state.expertHrsOneTime?1:state.contractYears;
+    var hLabel='Expert Hours - '+state.expertHrs+'h'+(hMult>1?(' x '+hMult+' yrs'):'')+(state.expertHrsOneTime&&state.contractYears>1?' (one-time)':'')+' (PS_EXPERT_HRS)';
+    rowsTxt.push([{text:hLabel},{text:money(state.expertHrs*RATES.expertHr*hMult),options:{align:'right'}}]);
+  }
+  if(state.sesQty>0&&state.pkg!=='elite'){
+    var sMult=state.sesOneTime?1:state.contractYears;
+    var sLabel='SES - '+state.sesQty+' block(s)'+(sMult>1?(' x '+sMult+' yrs'):'')+(state.sesOneTime&&state.contractYears>1?' (one-time)':'')+' (PS_SES)';
+    rowsTxt.push([{text:sLabel},{text:money(state.sesQty*RATES.sesBlock*sMult),options:{align:'right'}}]);
+  }
+  var total=grandTotal();
+  rowsTxt.push([{text:'Estimated total ('+state.contractYears+'-year)',options:{bold:true,color:'FF4C46'}},{text:money(total),options:{align:'right',bold:true,color:'FF4C46'}}]);
+  s2.addTable(rowsTxt,{x:0.4,y:1.0,w:9.2,colW:[6.8,2.4],fontSize:11,fontFace:'Arial',border:{type:'solid',color:'E8E8E8',pt:0.5},rowH:0.35});
+  var deliv=DELIVERABLES[state.pkg].onboarding;
+  var dtext='Key deliverables: ';for(var di=0;di<deliv.length;di++){dtext+=deliv[di];if(di<deliv.length-1)dtext+=';  ';}
+  s2.addText(dtext,{x:0.4,y:1.1+rowsTxt.length*0.38+0.3,w:9.2,h:1.0,color:'444444',fontSize:10,fontFace:'Arial',valign:'top'});
+  var tt=TALKTRACKS[state.pkg]||[];
+  if(tt.length){
+    var ttY=1.1+rowsTxt.length*0.38+1.35;
+    s2.addText('Why this investment',{x:0.4,y:ttY,w:9.2,h:0.25,color:'012B3A',fontSize:11,bold:true,fontFace:'Arial'});
+    for(var tj=0;tj<tt.length;tj++)s2.addText('\u2022 '+tt[tj],{x:0.5,y:ttY+0.28+tj*0.3,w:9.0,h:0.3,color:'333333',fontSize:10,fontFace:'Arial'});
+  }
+  s2.addText('Indicative estimate, not a quote or commercial commitment. Prices in USD. Valid until '+validityDate()+', subject to Professional Services confirmation and scheduling.',{x:0.2,y:6.95,w:9.6,h:0.35,color:'888888',fontSize:8,fontFace:'Arial',italic:true});
+  /* Optional two-option comparison slide: selected tier vs next tier. */
+  var cmpChk=document.getElementById('cmp-slide-check');
+  var cmpNext=comparisonTarget();
+  if(cmpNext&&cmpChk&&cmpChk.checked){
+    var sc=pptx.addSlide();
+    sc.addShape(pptx.ShapeType.rect,{x:0,y:0,w:'100%',h:0.65,fill:{color:'012B3A'}});
+    sc.addText('Two ways to run this rollout',{x:0.2,y:0.12,w:9,h:0.4,color:'FFFFFF',fontSize:16,bold:true,fontFace:'Arial'});
+    var selP=PKGS[state.pkg],nxtP=PKGS[cmpNext];
+    var selPrice=calcPrice(state.pkg),nxtPrice=calcPrice(cmpNext);
+    /* Left column: selected */
+    sc.addShape(pptx.ShapeType.roundRect,{x:0.3,y:1.0,w:4.5,h:5.2,fill:{color:'F7F7F7'},line:{color:'CCCCCC',width:0.75},rectRadius:0.08});
+    sc.addText(selP.name,{x:0.5,y:1.15,w:4.1,h:0.35,color:'333333',fontSize:15,bold:true,fontFace:'Arial'});
+    sc.addText(money(selPrice)+' / year',{x:0.5,y:1.5,w:4.1,h:0.3,color:'666666',fontSize:12,fontFace:'Arial'});
+    var selItems=DELIVERABLES[state.pkg].onboarding.slice(0,6);
+    for(var si=0;si<selItems.length;si++)sc.addText('\u2022 '+selItems[si],{x:0.5,y:1.95+si*0.34,w:4.1,h:0.34,color:'444444',fontSize:9.5,fontFace:'Arial'});
+    /* Right column: next tier, highlighted */
+    sc.addShape(pptx.ShapeType.roundRect,{x:5.2,y:1.0,w:4.5,h:5.2,fill:{color:'FFF5F5'},line:{color:'FF4C46',width:1.25},rectRadius:0.08});
+    sc.addText(nxtP.name,{x:5.4,y:1.15,w:4.1,h:0.35,color:'FF4C46',fontSize:15,bold:true,fontFace:'Arial'});
+    sc.addText(money(nxtPrice)+' / year',{x:5.4,y:1.5,w:4.1,h:0.3,color:'666666',fontSize:12,fontFace:'Arial'});
+    sc.addText('Everything in '+selP.name+', plus:',{x:5.4,y:1.85,w:4.1,h:0.25,color:'012B3A',fontSize:9.5,bold:true,fontFace:'Arial'});
+    var diffs=UPGRADE_DIFFS[state.pkg+'-'+cmpNext].slice(0,6);
+    for(var dj=0;dj<diffs.length;dj++)sc.addText('\u2022 '+diffs[dj],{x:5.4,y:2.15+dj*0.34,w:4.1,h:0.34,color:'012B3A',fontSize:9.5,fontFace:'Arial'});
+    sc.addShape(pptx.ShapeType.roundRect,{x:5.2,y:6.35,w:4.5,h:0.45,fill:{color:'012B3A'},rectRadius:0.06});
+    sc.addText('Difference: about '+money(nxtPrice-selPrice)+' per year',{x:5.35,y:6.42,w:4.2,h:0.3,color:'DFFFDE',fontSize:10,bold:true,fontFace:'Arial'});
+    sc.addText('Indicative pricing in USD, valid until '+validityDate()+'.',{x:0.3,y:6.95,w:9.4,h:0.3,color:'888888',fontSize:8,fontFace:'Arial',italic:true});
+  }
+  var s3=pptx.addSlide();
+  s3.addShape(pptx.ShapeType.rect,{x:0,y:0,w:'100%',h:0.65,fill:{color:'012B3A'}});
+  s3.addText((state.clientName?state.clientName+' - ':'')+'Implementation Timeline',{x:0.2,y:0.1,w:9.2,h:0.45,color:'FFFFFF',fontSize:16,bold:true,fontFace:'Arial'});
+  s3.addText('Timeline depends on client turnaround and scheduling',{x:0.2,y:0.68,w:9,h:0.2,color:'888888',fontSize:8,fontFace:'Arial',italic:true});
+  var legendItems=[['FF4C46','Hootsuite'],['012B3A','Client'],['7ec8a0','Joint'],['f0a500','Training'],['cce5ff','Ongoing']];
+  for(var li=0;li<legendItems.length;li++){s3.addShape(pptx.ShapeType.rect,{x:0.2+li*1.8,y:6.6,w:0.12,h:0.12,fill:{color:legendItems[li][0]}});s3.addText(legendItems[li][1],{x:0.36+li*1.8,y:6.58,w:1.4,h:0.18,fontSize:7,color:'444444',fontFace:'Arial'});}
+  var gx=0.2,gy=1.0,tw=9.6,lw=1.9;var cw=(tw-lw)/cols;var rh=0.24;
+  s3.addShape(pptx.ShapeType.rect,{x:gx,y:gy,w:tw,h:0.28,fill:{color:'012B3A'}});
+  s3.addText('Activity',{x:gx+0.05,y:gy+0.03,w:lw,h:0.22,color:'DFFFDE',fontSize:7,bold:true,fontFace:'Arial'});
+  for(var cl=0;cl<colLabels.length;cl++)s3.addText(colLabels[cl],{x:gx+lw+cl*cw,y:gy+0.03,w:cw,h:0.22,color:'DFFFDE',fontSize:6,bold:true,fontFace:'Arial',align:'center'});
+  var yo=gy+0.3;var lastSec='';
+  for(var rr=0;rr<rows.length;rr++){
+    var row=rows[rr];
+    if(row.section!==lastSec){s3.addShape(pptx.ShapeType.rect,{x:gx,y:yo,w:tw,h:0.16,fill:{color:'F0F0F0'}});s3.addText(row.section.toUpperCase(),{x:gx+0.05,y:yo,w:tw,h:0.16,color:'888888',fontSize:5.5,bold:true,fontFace:'Arial'});yo+=0.16;lastSec=row.section;}
+    s3.addText(row.label+(row.owner?' ('+row.owner+')':''),{x:gx,y:yo+0.02,w:lw-0.05,h:rh-0.04,color:'333333',fontSize:6,fontFace:'Arial',wrap:true});
+    for(var bb=0;bb<row.bars.length;bb++){var b=row.bars[bb];var span=Math.min(b.span,cols-b.col);s3.addShape(pptx.ShapeType.rect,{x:gx+lw+b.col*cw+0.02,y:yo+0.04,w:span*cw-0.04,h:rh-0.1,fill:{color:BAR[b.type]||'CCCCCC'},line:{color:BAR[b.type]||'CCCCCC',width:0}});}
+    yo+=rh;
+  }
+  s3.addShape(pptx.ShapeType.rect,{x:gx,y:yo,w:tw,h:0.24,fill:{color:'FFF0F0'},line:{color:'FF4C46',width:1}});
+  s3.addText('Graduation - handover to AM/CSM',{x:gx+0.1,y:yo+0.03,w:tw,h:0.18,color:'FF4C46',fontSize:8,bold:true,fontFace:'Arial'});
+  var fname=(state.clientName||'Hootsuite')+'_Services_Proposal_'+p.name;
+  pptx.writeFile({fileName:fname+'.pptx'});
 }
 
 function downloadPDF(){
-var btn=document.getElementById('pdf-btn');var orig=btn.innerHTML;
-if(typeof html2canvas==='undefined'||typeof window.jspdf==='undefined'){window.print();return;}
-btn.disabled=true;btn.innerHTML='Generating...';
-var card=document.getElementById('proposal-card');
-html2canvas(card,{scale:2,backgroundColor:'#ffffff',useCORS:true}).then(function(canvas){
-var imgData=canvas.toDataURL('image/png');
-var jsPDF=window.jspdf.jsPDF;
-var pdf=new jsPDF('p','pt','a4');
-var pw=pdf.internal.pageSize.getWidth();
-var ph=pdf.internal.pageSize.getHeight();
-var imgW=pw-40;var imgH=canvas.height*imgW/canvas.width;
-if(imgH<=ph-40){pdf.addImage(imgData,'PNG',20,20,imgW,imgH);}
-else{
-var pageContentH=ph-40;var srcY=0;var pageNum=0;
-while(srcY<canvas.height){
-var sliceH=Math.min(canvas.height-srcY,canvas.width*(pageContentH)/imgW);
-var tmp=document.createElement('canvas');tmp.width=canvas.width;tmp.height=sliceH;
-tmp.getContext('2d').drawImage(canvas,0,srcY,canvas.width,sliceH,0,0,canvas.width,sliceH);
-if(pageNum>0)pdf.addPage();
-pdf.addImage(tmp.toDataURL('image/png'),'PNG',20,20,imgW,sliceH*imgW/canvas.width);
-srcY+=sliceH;pageNum++;
-}
-}
-var fname=(state.clientName||'Hootsuite')+'_Services_Proposal_'+PKGS[state.pkg].name;
-pdf.save(fname+'.pdf');
-btn.disabled=false;btn.innerHTML=orig;
-}).catch(function(){btn.disabled=false;btn.innerHTML=orig;window.print();});
+  var btn=document.getElementById('pdf-btn');var orig=btn.innerHTML;
+  if(typeof html2canvas==='undefined'||typeof window.jspdf==='undefined'){window.print();return;}
+  btn.disabled=true;btn.innerHTML='Generating...';
+  var card=document.getElementById('proposal-card');
+  html2canvas(card,{scale:2,backgroundColor:'#ffffff',useCORS:true}).then(function(canvas){
+    var imgData=canvas.toDataURL('image/png');
+    var jsPDF=window.jspdf.jsPDF;
+    var pdf=new jsPDF('p','pt','a4');
+    var pw=pdf.internal.pageSize.getWidth();var ph=pdf.internal.pageSize.getHeight();
+    var imgW=pw-40;var imgH=canvas.height*imgW/canvas.width;
+    if(imgH<=ph-40){pdf.addImage(imgData,'PNG',20,20,imgW,imgH);}
+    else{
+      var pageContentH=ph-40;var srcY=0;var pageNum=0;
+      while(srcY<canvas.height){
+        var sliceH=Math.min(canvas.height-srcY,canvas.width*(pageContentH)/imgW);
+        var tmp=document.createElement('canvas');tmp.width=canvas.width;tmp.height=sliceH;
+        tmp.getContext('2d').drawImage(canvas,0,srcY,canvas.width,sliceH,0,0,canvas.width,sliceH);
+        if(pageNum>0)pdf.addPage();
+        pdf.addImage(tmp.toDataURL('image/png'),'PNG',20,20,imgW,sliceH*imgW/canvas.width);
+        srcY+=sliceH;pageNum++;
+      }
+    }
+    var fname=(state.clientName||'Hootsuite')+'_Services_Proposal_'+PKGS[state.pkg].name;
+    pdf.save(fname+'.pdf');
+    btn.disabled=false;btn.innerHTML=orig;
+  }).catch(function(){btn.disabled=false;btn.innerHTML=orig;window.print();});
 }
 
+/* ---------- share link (validated on load) ---------- */
 function copyShareLink(){
-var btn=document.getElementById('share-btn');var orig=btn.innerHTML;
-try{
-var encoded=encodeURIComponent(btoa(JSON.stringify(state)));
-var url=location.href.split('#')[0]+'#q='+encoded;
-navigator.clipboard.writeText(url).then(function(){btn.innerHTML='<i class="ti ti-check"></i> Link copied';setTimeout(function(){btn.innerHTML=orig;},2000);},function(){prompt('Copy this link:',url);});
-}catch(e){alert('Could not generate share link.');}
+  var btn=document.getElementById('share-btn');var orig=btn.innerHTML;
+  try{
+    var encoded=encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(state)))));
+    var url=location.href.split('#')[0]+'#q='+encoded;
+    navigator.clipboard.writeText(url).then(function(){btn.innerHTML='<i class="ti ti-check"></i> Link copied';setTimeout(function(){btn.innerHTML=orig;},2000);},function(){prompt('Copy this link:',url);});
+  }catch(e){alert('Could not generate share link.');}
 }
-
 function loadFromHash(){
-if(location.hash.indexOf('#q=')!==0)return false;
-try{
-var encoded=location.hash.substring(3);
-var decoded=JSON.parse(atob(decodeURIComponent(encoded)));
-state=decoded;
-state.completedSteps=[1,2,3];
-restoreFormFromState();
-return true;
-}catch(e){return false;}
+  if(location.hash.indexOf('#q=')!==0)return false;
+  try{
+    var encoded=location.hash.substring(3);
+    var json=decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
+    var decoded=JSON.parse(json);
+    if(!sanitizeState(decoded))return false;
+    state=decoded;
+    state.completedSteps=[1,2,3];
+    restoreFormFromState();
+    return true;
+  }catch(e){return false;}
 }
 
+/* ---------- send to PS (real confirmation via JSON response) ---------- */
+function sendToPS(){
+  if(!state.clientName){alert('Add a client name before sending to PS.');goStep(1);return;}
+  var soft=needsValidation();var hard=requiresPSSend();
+  var allReasons=hard.concat(soft);var flagged=allReasons.length>0;
+  var alertBox=document.getElementById('ps-alert-check');
+  var alertRequested=alertBox?alertBox.checked:false;
+  var notes=(document.getElementById('ps-notes')&&document.getElementById('ps-notes').value||'').trim().substring(0,800);
+  actualSend(flagged,alertRequested,allReasons.join(', '),notes);
+}
+function actualSend(flagged,alertRequested,validationReason,notes){
+  var aeEmail=localStorage.getItem('ps_ae_email')||'';
+  if(!/@hootsuite\.com$/i.test(aeEmail)){
+    aeEmail=prompt('Your Hootsuite email (saved for next time, used to send you a copy):','')||'';
+    aeEmail=aeEmail.trim().toLowerCase();
+    if(!/@hootsuite\.com$/i.test(aeEmail)){alert('Please use your @hootsuite.com email.');return;}
+    localStorage.setItem('ps_ae_email',aeEmail);
+  }
+  var aeName=aeEmail.split('@')[0].replace(/[._]/g,' ');
+  var btn=document.getElementById('sendps-btn');var orig=btn.innerHTML;var res=document.getElementById('send-result');
+  btn.disabled=true;btn.innerHTML='Sending...';if(res)res.style.display='none';
+  var prods=[];var ids=['perch','nest','analytics','lumenLite','parliament'];
+  for(var i=0;i<ids.length;i++){if(state.hsProducts[ids[i]].on){var q=state.hsProducts[ids[i]];var qty=q.unknown?'TBD':(q.qty||'');prods.push(PROD_NAMES[ids[i]]+(qty!==''?' ('+qty+')':''));}}
+  if(state.hasLumen)prods.push(LUMEN_LABELS[state.lumenTier]+(state.lumenQueries?' ('+state.lumenQueries+'q)':''));
+  var shareLink=location.href.split('#')[0]+'#q='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(state)))));
+  var submissionId='SC-'+Date.now().toString(36).toUpperCase();
+  var payload={
+    token:SUBMIT_TOKEN,submissionId:submissionId,submittedAt:new Date().toISOString(),pricingVersion:PRICING_VERSION,revisionOf:state.lastSubmissionId||'',
+    aeName:aeName,aeEmail:aeEmail,clientName:state.clientName,oppName:state.oppName,sfdcUrl:state.sfdcUrl,
+    dealType:state.dealType,region:state.region,deliveryLang:state.deliveryLang,
+    arr:state.arr,pkg:PKGS[state.pkg].name,pkgKey:state.pkg,products:prods,
+    perchSeats:state.hsProducts.perch.unknown?'TBD':(state.hsProducts.perch.qty||''),
+    analyticsConnections:state.hsProducts.analytics.unknown?'TBD':(state.hsProducts.analytics.qty||''),
+    lumenLiteQueries:state.hsProducts.lumenLite.unknown?'TBD':(state.hsProducts.lumenLite.qty||''),
+    parliamentSeats:state.hsProducts.parliament.unknown?'TBD':(state.hsProducts.parliament.qty||''),
+    lumenTier:state.hasLumen?state.lumenTier:'',lumenQueries:state.lumenQueries,lumenSources:state.lumenSources,lumenBackfill:state.lumenBackfill,
+    lumenScopeHours:'',lumenScopeVersion:'',
+    expertHrs:state.expertHrs,expertHrsOneTime:state.expertHrsOneTime,expertHrsManual:state.expertHrsManual,hoursPicks:hoursPicksSummary(),
+    sesQty:state.sesQty,sesOneTime:state.sesOneTime,contractYears:state.contractYears,total:grandTotal(),
+    isMigration:state.isMigration,isGlobal:state.isGlobal,isRegulated:state.isRegulated,
+    needsValidation:flagged,validationReason:validationReason,alertRequested:alertRequested,notes:notes||'',shareLink:shareLink
+  };
+  fetch(PS_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+    .then(function(r){return r.json().catch(function(){return {ok:r.ok};});})
+    .then(function(data){
+      if(data&&data.ok){
+        state.lastSubmissionId=submissionId;saveState();
+        btn.innerHTML='<i class="ti ti-check"></i> Sent to PS';
+        if(res){res.style.display='block';res.style.color='#0f5a3a';res.innerHTML='Recorded by PS. Reference '+esc(submissionId)+'.'+((flagged||alertRequested)?' A Slack alert was sent to PS'+(flagged&&!alertRequested?' (auto-flagged for validation)':'')+'.':'')+' If you change and resend this scope, it will be linked as a revision.';}
+      }else{throw new Error('rejected');}
+      setTimeout(function(){btn.disabled=false;btn.innerHTML=orig;},2500);
+    })
+    .catch(function(){
+      btn.disabled=false;btn.innerHTML=orig;
+      if(res){res.style.display='block';res.style.color='#c33';res.innerHTML='Could not confirm receipt. Copy the share link and ping Damien directly, or try again.';}
+    });
+}
+
+/* ---------- reset ---------- */
 function resetAll(){
-state={clientName:'',oppName:'',region:'',arr:0,contractYears:1,hsProducts:{hse:{on:false,unknown:false},inbox:{on:false},analytics:{on:false,unknown:false},listening:{on:false,unknown:false},amplify:{on:false,unknown:false}},hasTW:false,twTier:'analyze',isMigration:false,isGlobal:false,pkg:'',lastRec:'',expertHrs:0,sesQty:0,completedSteps:[]};
-try{sessionStorage.removeItem('ps_calc_state');}catch(e){}
-if(location.hash)location.hash='';
-document.getElementById('client-name').value='';document.getElementById('opp-name').value='';document.getElementById('region').value='';document.getElementById('arr-input').value='';
-var ids=['hse','inbox','analytics','listening','amplify'];
-for(var i=0;i<ids.length;i++){document.getElementById('chk-'+ids[i]).checked=false;document.getElementById('prod-'+ids[i]).classList.remove('active');document.getElementById(ids[i]+'-summary').textContent='';var dk=document.getElementById('dk-'+ids[i]);if(dk)dk.checked=false;}
-document.getElementById('has-tw').checked=false;document.getElementById('tw-tier-row').classList.add('hide');
-document.getElementById('is-migration').checked=false;document.getElementById('is-global').checked=false;
-var steps=[1,2,3,4];for(var s=0;s<steps.length;s++){var snum=document.getElementById('snum-'+steps[s]);if(snum)snum.innerHTML=steps[s];document.getElementById('nav-'+steps[s]).classList.remove('active','done');}
-goStep(1);
+  state=freshState();
+  try{localStorage.removeItem('ps_calc_state');}catch(e){}
+  if(location.hash)location.hash='';
+  document.getElementById('client-name').value='';document.getElementById('opp-name').value='';document.getElementById('sfdc-url').value='';
+  document.getElementById('region').value='';document.getElementById('arr-input').value='';document.getElementById('delivery-lang').value='English';
+  setDealType('new',true);
+  var ids=['perch','nest','analytics','lumenLite','parliament'];
+  for(var i=0;i<ids.length;i++){document.getElementById('chk-'+ids[i]).checked=false;document.getElementById('prod-'+ids[i]).classList.remove('active');document.getElementById(ids[i]+'-summary').textContent='';var dk=document.getElementById('dk-'+ids[i]);if(dk){dk.checked=false;}if(QTY_FIELDS[ids[i]]){var inp=document.getElementById(QTY_FIELDS[ids[i]].input);if(inp){inp.value='';inp.disabled=false;}}}
+  document.getElementById('has-lumen').checked=false;document.getElementById('lumen-tier-row').classList.add('hide');
+  document.getElementById('lumen-tier').value='unknown';
+  document.getElementById('is-migration').checked=false;document.getElementById('is-global').checked=false;document.getElementById('is-regulated').checked=false;
+  var steps=[1,2,3,4];for(var s=0;s<steps.length;s++){var snum=document.getElementById('snum-'+steps[s]);if(snum)snum.textContent=steps[s];document.getElementById('nav-'+steps[s]).classList.remove('active','done');}
+  var sr=document.getElementById('send-result');if(sr)sr.style.display='none';
+  goStep(1);
 }
 
-if(loadFromHash()){goStep(4);}else{loadState();updateProgress(1);}
+/* Prefill from URL params (SFDC button / bookmark): ?client=Acme&arr=80000&sfdc=...&region=EMEA&opp=... */
+function applyUrlParams(){
+  try{
+    var q=new URLSearchParams(location.search);var touched=false;
+    var c=(q.get('client')||'').trim().substring(0,120);
+    if(c){document.getElementById('client-name').value=c;state.clientName=c;touched=true;}
+    var o=(q.get('opp')||'').trim().substring(0,160);
+    if(o){document.getElementById('opp-name').value=o;state.oppName=o;touched=true;}
+    var sf=(q.get('sfdc')||'').trim().substring(0,300);
+    if(sf){document.getElementById('sfdc-url').value=sf;state.sfdcUrl=sf;touched=true;}
+    var a=Number(q.get('arr'));
+    if(isFinite(a)&&a>0&&a<100000000){a=Math.round(a);document.getElementById('arr-input').value=a;state.arr=a;touched=true;}
+    var r=(q.get('region')||'').toUpperCase();
+    if(['NA','LATAM','EMEA','APAC'].indexOf(r)!==-1){document.getElementById('region').value=r;state.region=r;touched=true;}
+    if(touched)saveState();
+  }catch(e){}
+}
+
+/* ---------- Quick prefill (deterministic, no AI) ----------
+   Scans a short note for obvious tokens. Only fills empty fields, never overwrites.
+   Deliberately simple: ARR numbers with K/M suffixes, region keyword, listed product names.
+   Anything ambiguous is left for the user to fill. Reports what was and wasn't matched. */
+function quickPrefill(){
+  var raw=(document.getElementById('prefill-notes').value||'').trim();
+  var status=document.getElementById('prefill-status');
+  if(raw.length<3){status.textContent='Add a few words first.';return;}
+  var t=raw.toLowerCase();
+  var filled=[];
+
+  /* ARR: look for a number followed by k/m, or a $ amount */
+  if(!document.getElementById('arr-input').value){
+    var m=raw.match(/\$?\s*([0-9]{1,4}(?:[.,][0-9]+)?)\s*([kKmM])\b/);
+    var arrNum=null;
+    if(m){var n=parseFloat(m[1].replace(',','.'));var mult=m[2].toLowerCase()==='m'?1000000:1000;arrNum=Math.round(n*mult);}
+    else{var m2=raw.match(/\$\s*([0-9]{4,9})\b/);if(m2)arrNum=parseInt(m2[1],10);}
+    if(arrNum&&arrNum>0&&arrNum<100000000){document.getElementById('arr-input').value=arrNum;state.arr=arrNum;filled.push('ARR');}
+  }
+
+  /* Region: match a keyword */
+  if(!document.getElementById('region').value){
+    var reg=null;
+    if(/\b(emea|europe|uk|england|france|germany|spain|italy)\b/i.test(t))reg='EMEA';
+    else if(/\b(latam|latin america|brazil|mexico|argentina)\b/i.test(t))reg='LATAM';
+    else if(/\b(apac|asia|australia|singapore|japan|india)\b/i.test(t))reg='APAC';
+    else if(/\b(na|north america|us|usa|canada)\b/i.test(t))reg='NA';
+    if(reg){document.getElementById('region').value=reg;state.region=reg;filled.push('Region');}
+  }
+
+  /* Client name: the one guess with no real keyword to anchor on, so it's scoped tightly.
+     Only fires when the note reads as a comma-shorthand list (Name, fact, fact...) AND the
+     leading segment doesn't itself look like a region, product, ARR figure, or flag word.
+     This catches "Acme Corp, EMEA, 80K ARR..." but stays silent on free-prose notes, where
+     guessing the first few words would usually be wrong. Always the lowest-confidence field. */
+  if(!document.getElementById('client-name').value&&raw.indexOf(',')!==-1){
+    var seg=raw.split(',')[0].trim();
+    var wordCount=seg.split(/\s+/).length;
+    var looksLikeName=seg.length>=2&&seg.length<=40&&wordCount<=3
+      &&!/[0-9$]/.test(seg)
+      &&!/\b(emea|europe|uk|england|france|germany|spain|italy|latam|latin america|brazil|mexico|argentina|apac|asia|australia|singapore|japan|india|na|north america|us|usa|canada)\b/i.test(seg)
+      &&!/\b(hse|hootsuite enterprise|hootsuite|publishing|advanced inbox|inbox|advanced analytics|analytics|listening|amplify|talkwalker|tw analyze|tw core|tw business|lumen)\b/i.test(seg)
+      &&!/\b(migration|migrating|moving off|sprinklr|sprout|meltwater|brandwatch|khoros|global|multi[- ]region|worldwide|finance|banking|healthcare|pharma|public sector|regulated|expansion|expand|renewal|deal|meeting|call|notes|opportunity|prospect|customer|client|update|intro|discovery)\b/i.test(seg);
+    if(looksLikeName){
+      document.getElementById('client-name').value=seg;state.clientName=seg;
+      filled.push('Client name (double-check this: "'+seg+'")');
+    }
+  }
+
+  /* Deal type: only if a strong keyword */
+  if(/\bexpansion\b|\bexpand\b|\badd(ing)? seats?\b/i.test(t)){setDealType('expansion',true);filled.push('Deal type (expansion)');}
+
+  /* Products: match by known name */
+  var prodMap=[
+    {id:'perch',rx:/\b(perch|hse|hootsuite enterprise|hootsuite|publishing)\b/i},
+    {id:'nest',rx:/\b(nest|advanced inbox|inbox)\b/i},
+    {id:'analytics',rx:/\b(advanced analytics|analytics)\b/i},
+    {id:'lumenLite',rx:/\b(lumen lite|listening)\b/i},
+    {id:'parliament',rx:/\b(parliament|amplify)\b/i}
+  ];
+  var prodHits=[];
+  for(var i=0;i<prodMap.length;i++){
+    var pm=prodMap[i];
+    if(pm.rx.test(t)&&!state.hsProducts[pm.id].on){
+      document.getElementById('chk-'+pm.id).checked=true;
+      onHsCheck(pm.id,true);
+      prodHits.push(PROD_NAMES[pm.id]);
+    }
+  }
+  if(prodHits.length)filled.push('Products: '+prodHits.join(', '));
+
+  /* Talkwalker: presence and tier keyword */
+  if(!state.hasLumen&&/\b(talkwalker|tw analyze|tw core|tw business|lumen)\b/i.test(t)){
+    document.getElementById('has-lumen').checked=true;onTwChange(true);filled.push('Lumen');
+    if(/\bbusiness\b|\bpremium\b/i.test(t)){document.getElementById('lumen-tier').value='business';state.lumenTier='business';}
+    else if(/\bcore\b/i.test(t)){document.getElementById('lumen-tier').value='core';state.lumenTier='core';}
+  }
+
+  /* Flags */
+  if(/\b(migration|migrating|moving off|sprinklr|sprout|meltwater|brandwatch|khoros)\b/i.test(t)&&!document.getElementById('is-migration').checked){
+    document.getElementById('is-migration').checked=true;filled.push('Migration flag');
+  }
+  if(/\bglobal\b|\bmulti[- ]region\b|\bworldwide\b/i.test(t)&&!document.getElementById('is-global').checked){
+    document.getElementById('is-global').checked=true;filled.push('Global flag');
+  }
+  onFlagChange();
+
+  /* Still not attempted: exact seat/query quantities, complexity. Those need a human. */
+  saveState();
+  status.textContent=filled.length?('Prefilled: '+filled.join('; ')+'. Please review and fill the rest.'):'Nothing recognised. Fill the form manually.';
+}
+
+/* ---------- boot ---------- */
+document.getElementById('build-stamp').textContent='(v2, updated '+BUILD_DATE+')';
+/* Anonymous view beacon: counts opens so adoption (views vs sends) is measurable. No client data sent. */
+try{fetch(PS_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:SUBMIT_TOKEN,beacon:'view'}),keepalive:true}).catch(function(){});}catch(e){}
+if(loadFromHash()){goStep(4);}else{loadState();applyUrlParams();updateProgress(1);}
+
 </script>
 </body>
 </html>
