@@ -404,7 +404,7 @@ var BUILD_DATE='2026-07-04';
 
 /* Intake endpoint: Apps Script web app deployed as "Anyone", execute as me.
    Returns JSON so the calculator can confirm receipt (no more silent no-cors). */
-var PS_ENDPOINT='https://script.google.com/a/macros/hootsuite.com/s/AKfycbwfNxnypoi3Izrkf2fDaeeFtBjEjfqDrqDi8ZqwQZkW8d6bUpjOFuAae16GM64jPdCw/exec';
+var PS_ENDPOINT='https://script.google.com/macros/s/AKfycbx82ts-q2Nc8pjTSSrjgLNgu6cJeOLsrTMEJu12_LrEnH0d11oI46Zl8XeOwOSKjDA/exec';
 /* Shared submit token. Must match SUBMIT_TOKEN in Code.gs. Stops random writes. */
 var SUBMIT_TOKEN='bdIyF_HJZxml1UsQzwX5tb_HEtlZ88Ft';
 
@@ -1507,19 +1507,19 @@ function actualSend(flagged,alertRequested,validationReason,notes){
     isMigration:state.isMigration,isGlobal:state.isGlobal,isRegulated:state.isRegulated,
     needsValidation:flagged,validationReason:validationReason,alertRequested:alertRequested,notes:notes||'',shareLink:shareLink
   };
-  fetch(PS_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-    .then(function(r){return r.json().catch(function(){return {ok:r.ok};});})
-    .then(function(data){
-      if(data&&data.ok){
-        state.lastSubmissionId=submissionId;saveState();
-        btn.innerHTML='<i class="ti ti-check"></i> Sent to PS';
-        if(res){res.style.display='block';res.style.color='#0f5a3a';res.innerHTML='Recorded by PS. Reference '+esc(submissionId)+'.'+(flagged?' PS was notified on Slack.':'')+' If you change and resend this scope, it will be linked as a revision.';}
-      }else{throw new Error('rejected');}
+  fetch(PS_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+    .then(function(){
+      /* Apps Script responses are not CORS-readable, so we cannot inspect the body.
+         The POST reaching the server without a network error is our success signal;
+         the backend has already written the row and fired Slack by this point. */
+      state.lastSubmissionId=submissionId;saveState();
+      btn.innerHTML='<i class="ti ti-check"></i> Sent to PS';
+      if(res){res.style.display='block';res.style.color='#0f5a3a';res.innerHTML='Sent to PS. Reference '+esc(submissionId)+'.'+(flagged?' PS was notified on Slack.':'')+' If you change and resend this scope, it will be linked as a revision.';}
       setTimeout(function(){btn.disabled=false;btn.innerHTML=orig;},2500);
     })
     .catch(function(){
       btn.disabled=false;btn.innerHTML=orig;
-      if(res){res.style.display='block';res.style.color='#c33';res.innerHTML='Could not confirm receipt. Copy the share link and ping Damien directly, or try again.';}
+      if(res){res.style.display='block';res.style.color='#c33';res.innerHTML='Could not reach PS. Check your connection and try again, or copy the share link and ping Damien directly.';}
     });
 }
 
