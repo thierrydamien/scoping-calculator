@@ -41,6 +41,13 @@ select:focus,input:focus{outline:none;border-color:#FF4C46;box-shadow:0 0 0 2px 
 input.error{border-color:#FF4C46;background:#fff8f8}
 .field-error{font-size:12px;color:#FF4C46;margin-top:4px}
 .field-hint{font-size:11px;color:var(--color-text-tertiary,#999);margin-top:4px}
+.opt{font-weight:400;color:var(--color-text-tertiary,#999);font-size:12px}
+.req{font-weight:400;color:#FF4C46;font-size:12px}
+.prefill-details{border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:8px;padding:8px 12px;background:var(--color-background-secondary,#fafafa)}
+.prefill-details summary{cursor:pointer;font-size:13px;color:var(--color-text-secondary,#666);font-weight:500;list-style:none}
+.prefill-details summary::-webkit-details-marker{display:none}
+.prefill-details summary::before{content:'\25B6';font-size:9px;margin-right:6px;color:var(--color-text-tertiary,#999)}
+.prefill-details[open] summary::before{content:'\25BC'}
 .toggle-row{display:flex;align-items:flex-start;justify-content:space-between;padding:10px 0;gap:12px}
 .toggle-row+.toggle-row{border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))}
 .toggle-label{font-size:14px;line-height:1.4}
@@ -61,8 +68,9 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 .seg-btn .seg-title{font-weight:500;font-size:14px}
 .seg-btn .seg-sub{font-size:11px;color:var(--color-text-tertiary,#999);margin-top:2px;display:block}
 .hs-product{border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:10px;overflow:hidden;margin-bottom:8px}
-.hs-product-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--color-background-primary,#fff)}
-.hs-product-header:hover{background:var(--color-background-secondary,#f8f8f8)}
+.hs-product-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--color-background-primary,#fff)}
+.hs-product.active .hs-product-header{cursor:pointer}
+.hs-product.active .hs-product-header:hover{background:var(--color-background-secondary,#f8f8f8)}
 .hs-product.active .hs-product-header{background:#fff8f8;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))}
 .hs-product-name{font-size:14px;font-weight:500}
 .hs-product-body{padding:10px 14px;display:none;background:var(--color-background-secondary,#f8f8f8)}
@@ -108,6 +116,23 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 .upgrade-col.next .upgrade-item.new-feature::before{background:#012B3A}
 .price-delta{background:#012B3A;color:#DFFFDE;border-radius:6px;padding:6px 10px;font-size:12px;margin-top:10px;display:inline-block}
 .deliverables-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:600px){
+  .grid-2{grid-template-columns:1fr;gap:12px}
+  .container{padding:1rem}
+  .card{padding:1rem}
+  .seg{flex-direction:column}
+  .seg-btn{min-width:0;width:100%}
+  .pkg-grid{grid-template-columns:1fr 1fr}
+  .detail-row{align-items:flex-start}
+  .detail-row input[type=number]{width:100%;flex:1}
+  .top-bar h1{font-size:14px}
+  .step-item{padding:10px 10px;font-size:12px}
+  .recap-card{font-size:12px;gap:4px 10px}
+}
+@media(max-width:400px){
+  .pkg-grid{grid-template-columns:1fr}
+}
 @media(max-width:520px){.deliverables-grid{grid-template-columns:1fr}.upgrade-grid{grid-template-columns:1fr}}
 .del-card{border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.12));border-radius:8px;padding:10px 12px}
 .del-card.excl{background:var(--color-background-secondary,#fafafa)}
@@ -233,26 +258,29 @@ input.error{border-color:#FF4C46;background:#fff8f8}
 <div class="container">
 
 <div id="step-1">
-<div class="card" style="margin-bottom:1rem">
-  <div class="section-title" style="margin-bottom:6px"><i class="ti ti-clipboard" aria-hidden="true"></i> Quick prefill from notes <span style="font-weight:400;color:var(--color-text-tertiary,#999);font-size:12px">(optional)</span></div>
-  <p class="muted" style="margin-bottom:10px">Paste a few lines of deal notes and we'll prefill what we can, ARR, region, obvious product names. It works best on a short note rather than a full email thread, since it's scanning for keywords, not reading for context. Review and fill in the rest before moving on.</p>
-  <textarea id="prefill-notes" rows="3" placeholder="e.g. Acme Corp, EMEA, ~80K ARR, Perch 60 seats, Advanced Analytics, Lumen Analyze" style="width:100%;padding:10px;border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.25));border-radius:8px;font-size:14px;font-family:Arial,sans-serif;resize:vertical"></textarea>
-  <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap">
-    <button type="button" class="btn btn-outline-dark" id="prefill-btn" onclick="quickPrefill()"><i class="ti ti-arrow-down" aria-hidden="true"></i> Prefill what I can</button>
-    <span id="prefill-status" style="font-size:13px;color:var(--color-text-secondary,#666)"></span>
-  </div>
-</div>
 <div class="card">
   <h2>Deal details</h2>
   <p class="muted" style="margin-bottom:1.25rem">Enter the opportunity information to determine the recommended package.</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-    <div><label class="field-label" for="client-name">Client name</label><input type="text" id="client-name" placeholder="e.g. Acme Corp"><div class="field-error hide" id="client-error">Please enter the client name.</div></div>
-    <div><label class="field-label" for="opp-name">Opportunity name <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional)</span></label><input type="text" id="opp-name" placeholder="e.g. Acme Corp FY26 Renewal"></div>
+  <details class="prefill-details">
+    <summary><i class="ti ti-clipboard" aria-hidden="true"></i> Paste deal notes to prefill <span class="opt">(optional)</span></summary>
+    <div style="margin-top:10px">
+      <p class="muted" style="margin-bottom:10px">Scans a short note for ARR, region, and obvious product names, and fills what it can. Works best on a few lines, not a full email thread. Review the rest before continuing.</p>
+      <textarea id="prefill-notes" rows="3" placeholder="e.g. Acme Corp, EMEA, ~80K ARR, Perch 60 seats, Advanced Analytics, Lumen Analyze" style="width:100%;padding:10px;border:0.5px solid var(--color-border-secondary,rgba(0,0,0,0.25));border-radius:8px;font-size:14px;font-family:Arial,sans-serif;resize:vertical"></textarea>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap">
+        <button type="button" class="btn btn-outline-dark" id="prefill-btn" onclick="quickPrefill()"><i class="ti ti-arrow-down" aria-hidden="true"></i> Prefill what I can</button>
+        <span id="prefill-status" style="font-size:13px;color:var(--color-text-secondary,#666)"></span>
+      </div>
+    </div>
+  </details>
+  <div style="margin-bottom:14px;margin-top:14px"><label class="field-label" for="ae-email">Your Hootsuite email <span class="req">(required)</span></label><input type="email" id="ae-email" placeholder="you@hootsuite.com" oninput="onAeEmailInput(this.value)" onblur="onAeEmailBlur()"><div class="field-hint" id="ae-email-hint">Used so PS knows who scoped this and can reach you. Saved for next time.</div><div class="field-error hide" id="ae-email-error">Please use your @hootsuite.com email.</div></div>
+  <div class="grid-2">
+    <div><label class="field-label" for="client-name">Client name <span class="req">(required)</span></label><input type="text" id="client-name" placeholder="e.g. Acme Corp"><div class="field-error hide" id="client-error">Please enter the client name.</div></div>
+    <div><label class="field-label" for="opp-name">Opportunity name <span class="opt">(optional)</span></label><input type="text" id="opp-name" placeholder="e.g. Acme Corp FY26 Renewal"></div>
   </div>
-  <div style="margin-bottom:14px"><label class="field-label" for="sfdc-url">Salesforce opportunity link or ID <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional)</span></label><input type="url" id="sfdc-url" placeholder="https://hootsuite.lightning.force.com/... or 006..."><div class="field-hint">Optional, but strongly recommended: links the scope to the opp so PS can join it to pipeline.</div></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div><label class="field-label" for="region">Region <span style="font-weight:400;color:var(--color-text-tertiary,#999)">(optional)</span></label><select id="region"><option value="">Select region</option><option value="NA">North America (NA)</option><option value="LATAM">Latin America (LATAM)</option><option value="EMEA">EMEA</option><option value="APAC">APAC</option></select></div>
-    <div><label class="field-label" for="arr-input">Total tech ARR (USD)</label><input type="number" id="arr-input" placeholder="e.g. 75000" min="0" step="1000"><div class="field-hint" id="arr-hint">ARR determines which packages are available.</div><div class="field-error hide" id="arr-error">Please enter the total tech ARR to continue.</div></div>
+  <div style="margin-bottom:14px"><label class="field-label" for="sfdc-url">Salesforce opportunity link or ID <span class="opt">(optional)</span></label><input type="url" id="sfdc-url" placeholder="https://hootsuite.lightning.force.com/... or 006..."><div class="field-hint">Optional, but strongly recommended: links the scope to the opp so PS can join it to pipeline.</div></div>
+  <div class="grid-2">
+    <div><label class="field-label" for="region">Region <span class="opt">(optional)</span></label><select id="region"><option value="">Select region</option><option value="NA">North America (NA)</option><option value="LATAM">Latin America (LATAM)</option><option value="EMEA">EMEA</option><option value="APAC">APAC</option></select></div>
+    <div><label class="field-label" for="arr-input">Total tech ARR (USD) <span class="req">(required)</span></label><input type="number" id="arr-input" placeholder="e.g. 75000" min="0" step="1000"><div class="field-hint" id="arr-hint">ARR determines which packages are available.</div><div class="field-error hide" id="arr-error">Please enter the total tech ARR to continue.</div></div>
   </div>
   <div style="margin-top:14px"><label class="field-label" for="delivery-lang">Delivery language</label><select id="delivery-lang" onchange="onLangChange()"><option value="English">English</option><option value="French">French</option><option value="Spanish">Spanish</option><option value="Portuguese">Portuguese</option><option value="German">German</option><option value="Other">Other / multiple</option></select><div class="field-hint">Non-English delivery constrains staffing and may extend lead time.</div></div>
   <hr class="section-divider">
@@ -260,6 +288,15 @@ input.error{border-color:#FF4C46;background:#fff8f8}
   <div class="seg" id="deal-type-seg" role="group" aria-label="Deal type">
     <button type="button" class="seg-btn on" data-dt="new" onclick="setDealType('new')"><span class="seg-title">New implementation</span><span class="seg-sub">First-time onboarding</span></button>
     <button type="button" class="seg-btn" data-dt="expansion" onclick="setDealType('expansion')"><span class="seg-title">Expansion</span><span class="seg-sub">Add products or seats</span></button>
+  </div>
+  <div id="expansion-q" class="hide" style="margin-top:14px">
+    <label class="field-label">Does this expansion add a product the client doesn't already have?</label>
+    <div class="seg" id="expansion-kind-seg" role="group" aria-label="Expansion type" style="margin-top:6px">
+      <button type="button" class="seg-btn" data-ek="product" onclick="setExpansionKind('product')"><span class="seg-title">Yes, a new product</span><span class="seg-sub">e.g. adding Lumen to a Perch client</span></button>
+      <button type="button" class="seg-btn" data-ek="seats" onclick="setExpansionKind('seats')"><span class="seg-title">No, just more seats/connections</span><span class="seg-sub">More of a product they already have</span></button>
+    </div>
+    <div id="expansion-product-note" class="hide" style="margin-top:12px;padding:12px 14px;background:#fff5f5;border:0.5px solid #FF4C46;border-radius:8px;font-size:13px;color:#012B3A;line-height:1.5"><i class="ti ti-alert-circle" aria-hidden="true"></i> <b>A services package is required.</b> Adding a new product means new onboarding, so this deal needs a current services package (Essentials, Plus, Advanced, or Elite). Scope it below as normal.</div>
+    <div id="expansion-seats-note" class="hide" style="margin-top:12px;padding:12px 14px;background:#f1f9f1;border:0.5px solid #2e7d46;border-radius:8px;font-size:13px;color:#012B3A;line-height:1.5"><i class="ti ti-circle-check" aria-hidden="true"></i> <b>No new services package needed.</b> Adding seats or connections to a product the client already has doesn't require a new package. They can renew on their existing agreement, including legacy packages like Premier. You likely don't need to scope PS for this deal.</div>
   </div>
   <hr class="section-divider">
   <div class="subsection-title">Hootsuite products</div>
@@ -357,8 +394,7 @@ input.error{border-color:#FF4C46;background:#fff8f8}
       <span id="multi-year-note" style="font-size:12px;color:var(--color-text-secondary,#666)"></span>
     </div>
     <div class="total-row"><div class="total-label">Estimated total services <span id="total-year-label">(Year 1)</span></div><div class="total-price" id="total-price-display"></div></div>
-    <div class="info-box" style="margin-top:8px;font-size:12px">Prices in USD. Package fee, Expert Hours and SES all scale with contract length by default. Use the "One-time" toggle on an add-on to hold it flat. Package % applies to total tech ARR annually. This is an indicative scope, not a quote or a commercial commitment. <span id="validity-note"></span> Services pricing is not discountable by AEs; any exception requires PS leadership approval before it is offered to the client.</div>
-    <div class="lead-note" id="lead-note"></div>
+    <div class="info-box" style="margin-top:8px;font-size:12px">Prices in USD. Package fee, Expert Hours and SES all scale with contract length by default. Use the "One-time" toggle on an add-on to hold it flat. Package % applies to total tech ARR annually. This is an indicative scope, not a quote or a commercial commitment. Services pricing is not discountable by AEs; any exception requires PS leadership approval before it is offered to the client.</div>
   </div>
   <div style="margin-top:1.25rem"><div class="section-title" style="font-size:14px"><i class="ti ti-calendar" aria-hidden="true"></i> Implementation timeline</div>
     <div class="gantt-scroll-wrap"><div id="gantt-container"></div></div>
@@ -468,7 +504,6 @@ var UPGRADE_DIFFS={
 };
 
 
-var LEAD_TIME={NA:'2 to 3 weeks',LATAM:'3 to 4 weeks',EMEA:'2 to 4 weeks',APAC:'3 to 5 weeks','':'2 to 4 weeks'};
 /* ---- Detailed TW scoping (optional) ----
    Allowances from the Services by Product Matrix (last updated June 23 2026), per package + Lumen sub-tier.
    Per-unit hours from the Lumen scoping framework (the Gemini gem).
@@ -484,7 +519,7 @@ var PROD_NAMES={perch:'Perch',nest:'Nest',analytics:'Adv Analytics',lumenLite:'L
 var QTY_FIELDS={perch:{input:'perch-seats',noun:'seats'},analytics:{input:'analytics-connections',noun:'connections'},lumenLite:{input:'lumenLite-queries',noun:'queries'},parliament:{input:'parliament-seats',noun:'seats'}};
 
 function freshState(){
-  return {clientName:'',oppName:'',sfdcUrl:'',region:'',arr:0,contractYears:1,dealType:'new',deliveryLang:'English',
+  return {clientName:'',oppName:'',sfdcUrl:'',region:'',arr:0,contractYears:1,dealType:'new',expansionKind:'',deliveryLang:'English',
     hsProducts:{perch:{on:false,unknown:false,qty:0},nest:{on:false},analytics:{on:false,unknown:false,qty:0},lumenLite:{on:false,unknown:false,qty:0},parliament:{on:false,unknown:false,qty:0}},
     hasLumen:false,lumenTier:'unknown',lumenQueries:0,lumenSources:0,lumenBackfill:false,
     isMigration:false,isGlobal:false,isRegulated:false,
@@ -495,7 +530,6 @@ var warnTimer=null;
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function money(n){return '$'+Math.round(n||0).toLocaleString();}
-function validityDate(){var d=new Date();d.setDate(d.getDate()+30);return d.toISOString().substring(0,10);}
 
 function saveState(){try{localStorage.setItem('ps_calc_state',JSON.stringify(state));}catch(e){}}
 function loadState(){try{var s=localStorage.getItem('ps_calc_state');if(s){var parsed=JSON.parse(s);if(sanitizeState(parsed)){state=parsed;restoreFormFromState();}}}catch(e){}}
@@ -522,6 +556,7 @@ function sanitizeState(o){
   for(var k in base){if(!(k in o))o[k]=base[k];}
   if(!PKGS[o.pkg])o.pkg='';
   if(['new','expansion'].indexOf(o.dealType)===-1)o.dealType='new';
+  if(['','product','seats'].indexOf(o.expansionKind)===-1)o.expansionKind='';
   if(['unknown','core','analyze','business'].indexOf(o.lumenTier)===-1)o.lumenTier='unknown';
   o.arr=Number(o.arr)||0;
   o.contractYears=[1,2,3].indexOf(Number(o.contractYears))!==-1?Number(o.contractYears):1;
@@ -539,6 +574,7 @@ function sanitizeState(o){
 }
 
 function restoreFormFromState(){
+  try{var savedEmail=localStorage.getItem('ps_ae_email')||'';var ae=document.getElementById('ae-email');if(ae&&savedEmail)ae.value=savedEmail;}catch(e){}
   document.getElementById('client-name').value=state.clientName||'';
   document.getElementById('opp-name').value=state.oppName||'';
   document.getElementById('sfdc-url').value=state.sfdcUrl||'';
@@ -578,7 +614,24 @@ function setDealType(dt,silent){
   state.dealType=dt;
   var btns=document.querySelectorAll('#deal-type-seg .seg-btn');
   for(var i=0;i<btns.length;i++){btns[i].classList.toggle('on',btns[i].getAttribute('data-dt')===dt);}
+  var q=document.getElementById('expansion-q');
+  if(q)q.classList.toggle('hide',dt!=='expansion');
+  if(dt!=='expansion'){state.expansionKind='';}
+  renderExpansionKind();
   if(!silent)saveState();
+}
+function setExpansionKind(kind,silent){
+  state.expansionKind=kind;
+  renderExpansionKind();
+  if(!silent)saveState();
+}
+function renderExpansionKind(){
+  var btns=document.querySelectorAll('#expansion-kind-seg .seg-btn');
+  for(var i=0;i<btns.length;i++){btns[i].classList.toggle('on',btns[i].getAttribute('data-ek')===state.expansionKind);}
+  var pNote=document.getElementById('expansion-product-note');
+  var sNote=document.getElementById('expansion-seats-note');
+  if(pNote)pNote.classList.toggle('hide',state.expansionKind!=='product');
+  if(sNote)sNote.classList.toggle('hide',state.expansionKind!=='seats');
 }
 function onLangChange(){state.deliveryLang=document.getElementById('delivery-lang').value;saveState();}
 function onFlagChange(){
@@ -587,8 +640,20 @@ function onFlagChange(){
   state.isRegulated=document.getElementById('is-regulated').checked;
   saveState();
 }
-function toggleHsProd(id){var el=document.getElementById('prod-'+id);var chk=document.getElementById('chk-'+id);if(!chk.checked){chk.checked=true;onHsCheck(id,true);}else{el.classList.toggle('active');}}
-function onHsCheck(id,val){state.hsProducts[id].on=val;document.getElementById('prod-'+id).classList.toggle('active',val);updateHsSummary(id);saveState();}
+function toggleHsProd(id){
+  /* Header click only expands/collapses, and only when the product is on.
+     Including a product is done solely via the toggle switch, removing the
+     old ambiguity where clicking the header force-enabled the product. */
+  var chk=document.getElementById('chk-'+id);
+  if(!chk.checked)return;
+  document.getElementById('prod-'+id).classList.toggle('active');
+}
+function onHsCheck(id,val){
+  state.hsProducts[id].on=val;
+  document.getElementById('prod-'+id).classList.toggle('active',val);
+  updateHsSummary(id);
+  saveState();
+}
 
 function onQtyInput(id,inputId){
   var v=parseInt(document.getElementById(inputId).value,10);
@@ -896,7 +961,8 @@ function renderDeliverables(k){
 
 function buildHints(){
   var k=state.pkg;var hints=[];
-  if(state.dealType==='expansion')hints.push('Expansion: scope onboarding only for the products being added, not the whole platform.');
+  if(state.dealType==='expansion'&&state.expansionKind==='product')hints.push('Expansion adding a new product: a services package is required for the new product\u2019s onboarding. Scope onboarding for the added product only, not the whole platform.');
+  if(state.dealType==='expansion'&&state.expansionKind==='seats')hints.push('Expansion adding seats/connections only: no new services package is required. The client can renew on their existing agreement.');
   if(k==='plus'&&state.hsProducts.perch.on)hints.push('End-user training for Perch is not included in Plus. Typically about '+PLUS_HOURS_LIMIT+'h in Expert Hours, put 5 in the hours field if the client needs it.');
   if(k==='plus'&&state.isMigration)hints.push('Migration detected. Scope migration architecture and data mapping as Expert Hours below; upgrading to Advanced isn\u2019t required unless the client wants a named Technical Account Manager for the cutover. Reach out to PS for sizing help.');
   if(state.hasLumen&&state.lumenTier==='business')hints.push('Lumen Business/Premium implementations can be complex. If query volumes are large or unclear, reach out to PS for scoping support.');
@@ -1200,12 +1266,6 @@ function renderSummary(){
   document.getElementById('price-breakdown').innerHTML=bHtml;
   document.getElementById('sum-years').value=state.contractYears;
   updateMultiYear(state.contractYears);
-  var lead=LEAD_TIME[state.region]||LEAD_TIME[''];
-  var leadTxt='Typical PS start lead time for '+(state.region||'this region')+': '+lead+' after signature, subject to scheduling.';
-  if(state.deliveryLang&&state.deliveryLang!=='English')leadTxt+=' Delivery language is '+state.deliveryLang+', which may extend lead time depending on consultant availability.';
-  document.getElementById('lead-note').textContent=leadTxt;
-  var vn=document.getElementById('validity-note');
-  if(vn)vn.textContent='Estimate valid until '+validityDate()+', subject to PS confirmation.';
   renderGantt();
   updateValidationUI();
 }
@@ -1362,7 +1422,7 @@ function buildPPTX(){
     s2.addText('Why this investment',{x:0.4,y:ttY,w:9.2,h:0.25,color:'012B3A',fontSize:11,bold:true,fontFace:'Arial'});
     for(var tj=0;tj<tt.length;tj++)s2.addText('\u2022 '+tt[tj],{x:0.5,y:ttY+0.28+tj*0.3,w:9.0,h:0.3,color:'333333',fontSize:10,fontFace:'Arial'});
   }
-  s2.addText('Indicative estimate, not a quote or commercial commitment. Prices in USD. Valid until '+validityDate()+', subject to Professional Services confirmation and scheduling.',{x:0.2,y:6.95,w:9.6,h:0.35,color:'888888',fontSize:8,fontFace:'Arial',italic:true});
+  s2.addText('Indicative estimate, not a quote or commercial commitment. Prices in USD. Subject to Professional Services confirmation and scheduling.',{x:0.2,y:6.95,w:9.6,h:0.35,color:'888888',fontSize:8,fontFace:'Arial',italic:true});
   /* Optional two-option comparison slide: selected tier vs next tier. */
   var cmpChk=document.getElementById('cmp-slide-check');
   var cmpNext=comparisonTarget();
@@ -1387,7 +1447,7 @@ function buildPPTX(){
     for(var dj=0;dj<diffs.length;dj++)sc.addText('\u2022 '+diffs[dj],{x:5.4,y:2.15+dj*0.34,w:4.1,h:0.34,color:'012B3A',fontSize:9.5,fontFace:'Arial'});
     sc.addShape(pptx.ShapeType.roundRect,{x:5.2,y:6.35,w:4.5,h:0.45,fill:{color:'012B3A'},rectRadius:0.06});
     sc.addText('Difference: about '+money(nxtPrice-selPrice)+' per year',{x:5.35,y:6.42,w:4.2,h:0.3,color:'DFFFDE',fontSize:10,bold:true,fontFace:'Arial'});
-    sc.addText('Indicative pricing in USD, valid until '+validityDate()+'.',{x:0.3,y:6.95,w:9.4,h:0.3,color:'888888',fontSize:8,fontFace:'Arial',italic:true});
+    sc.addText('Indicative pricing in USD.',{x:0.3,y:6.95,w:9.4,h:0.3,color:'888888',fontSize:8,fontFace:'Arial',italic:true});
   }
   var s3=pptx.addSlide();
   s3.addShape(pptx.ShapeType.rect,{x:0,y:0,w:'100%',h:0.65,fill:{color:'012B3A'}});
@@ -1475,14 +1535,34 @@ function sendToPS(){
   var notes=(document.getElementById('ps-notes')&&document.getElementById('ps-notes').value||'').trim().substring(0,800);
   actualSend(flagged,alertRequested,allReasons.join(', '),notes);
 }
+function onAeEmailInput(v){
+  var err=document.getElementById('ae-email-error');
+  if(err)err.classList.add('hide');
+  try{localStorage.setItem('ps_ae_email',String(v||'').trim().toLowerCase());}catch(e){}
+}
+function onAeEmailBlur(){
+  var el=document.getElementById('ae-email');if(!el)return;
+  var v=el.value.trim().toLowerCase();
+  var err=document.getElementById('ae-email-error');
+  if(v&&!/@hootsuite\.com$/i.test(v)){if(err)err.classList.remove('hide');}
+  else{if(err)err.classList.add('hide');try{localStorage.setItem('ps_ae_email',v);}catch(e){}}
+}
+function getAeEmail(){
+  var el=document.getElementById('ae-email');
+  var v=(el&&el.value||'').trim().toLowerCase();
+  if(!v){v=(localStorage.getItem('ps_ae_email')||'').trim().toLowerCase();if(v&&el)el.value=v;}
+  return v;
+}
 function actualSend(flagged,alertRequested,validationReason,notes){
-  var aeEmail=localStorage.getItem('ps_ae_email')||'';
+  var aeEmail=getAeEmail();
   if(!/@hootsuite\.com$/i.test(aeEmail)){
-    aeEmail=prompt('Your Hootsuite email (saved for next time, used to send you a copy):','')||'';
-    aeEmail=aeEmail.trim().toLowerCase();
-    if(!/@hootsuite\.com$/i.test(aeEmail)){alert('Please use your @hootsuite.com email.');return;}
-    localStorage.setItem('ps_ae_email',aeEmail);
+    var err=document.getElementById('ae-email-error');
+    if(err)err.classList.remove('hide');
+    goStep(1);
+    var el=document.getElementById('ae-email');if(el)el.focus();
+    return;
   }
+  try{localStorage.setItem('ps_ae_email',aeEmail);}catch(e){}
   var aeName=aeEmail.split('@')[0].replace(/[._]/g,' ');
   var btn=document.getElementById('sendps-btn');var orig=btn.innerHTML;var res=document.getElementById('send-result');
   btn.disabled=true;btn.innerHTML='Sending...';if(res)res.style.display='none';
@@ -1494,7 +1574,7 @@ function actualSend(flagged,alertRequested,validationReason,notes){
   var payload={
     token:SUBMIT_TOKEN,submissionId:submissionId,submittedAt:new Date().toISOString(),pricingVersion:PRICING_VERSION,revisionOf:state.lastSubmissionId||'',
     aeName:aeName,aeEmail:aeEmail,clientName:state.clientName,oppName:state.oppName,sfdcUrl:state.sfdcUrl,
-    dealType:state.dealType,region:state.region,deliveryLang:state.deliveryLang,
+    dealType:state.dealType,expansionKind:state.expansionKind,region:state.region,deliveryLang:state.deliveryLang,
     arr:state.arr,pkg:PKGS[state.pkg].name,pkgKey:state.pkg,products:prods,
     perchSeats:state.hsProducts.perch.unknown?'TBD':(state.hsProducts.perch.qty||''),
     analyticsConnections:state.hsProducts.analytics.unknown?'TBD':(state.hsProducts.analytics.qty||''),
@@ -1555,6 +1635,32 @@ function applyUrlParams(){
     if(isFinite(a)&&a>0&&a<100000000){a=Math.round(a);document.getElementById('arr-input').value=a;state.arr=a;touched=true;}
     var r=(q.get('region')||'').toUpperCase();
     if(['NA','LATAM','EMEA','APAC'].indexOf(r)!==-1){document.getElementById('region').value=r;state.region=r;touched=true;}
+    var lang=(q.get('lang')||'').trim();
+    var langOpts=['English','French','Spanish','Portuguese','German','Other'];
+    for(var li=0;li<langOpts.length;li++){if(langOpts[li].toLowerCase()===lang.toLowerCase()){document.getElementById('delivery-lang').value=langOpts[li];state.deliveryLang=langOpts[li];touched=true;break;}}
+    var cy=parseInt(q.get('years'),10);
+    if(cy>=1&&cy<=3){state.contractYears=cy;touched=true;}
+    var ae=(q.get('ae')||'').trim().toLowerCase();
+    if(/@hootsuite\.com$/i.test(ae)){var aeEl=document.getElementById('ae-email');if(aeEl)aeEl.value=ae;try{localStorage.setItem('ps_ae_email',ae);}catch(e){}}
+    /* Products: comma-separated ids or names, e.g. products=perch,lumenLite,lumen
+       Accepts calculator ids (perch,nest,analytics,lumenLite,parliament) and 'lumen' for standalone Lumen.
+       Optional seat/qty hints: perch:50 sets the seat count. */
+    var prodParam=(q.get('products')||'').trim();
+    if(prodParam){
+      var aliases={perch:'perch',hse:'perch',publishing:'perch',nest:'nest',inbox:'nest',analytics:'analytics','advanced analytics':'analytics',lumenlite:'lumenLite','lumen lite':'lumenLite',listening:'lumenLite',parliament:'parliament',amplify:'parliament'};
+      var parts=prodParam.split(',');
+      for(var pi=0;pi<parts.length;pi++){
+        var seg=parts[pi].trim();if(!seg)continue;
+        var kv=seg.split(':');var key=kv[0].trim().toLowerCase();var qty=kv[1]?parseInt(kv[1],10):null;
+        if(key==='lumen'){var hl=document.getElementById('has-lumen');if(hl){hl.checked=true;onTwChange(true);}touched=true;continue;}
+        var id=aliases[key];
+        if(id&&state.hsProducts[id]){
+          var chk=document.getElementById('chk-'+id);if(chk){chk.checked=true;onHsCheck(id,true);}
+          if(qty&&qty>0&&('qty' in state.hsProducts[id])){state.hsProducts[id].qty=qty;var qf=QTY_FIELDS[id];if(qf){var qEl=document.getElementById(qf.input);if(qEl)qEl.value=qty;}updateHsSummary(id);}
+          touched=true;
+        }
+      }
+    }
     if(touched)saveState();
   }catch(e){}
 }
@@ -1656,6 +1762,8 @@ document.getElementById('build-stamp').textContent='(v2, updated '+BUILD_DATE+')
 /* Anonymous view beacon: counts opens so adoption (views vs sends) is measurable. No client data sent. */
 try{fetch(PS_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:SUBMIT_TOKEN,beacon:'view'}),keepalive:true}).catch(function(){});}catch(e){}
 if(loadFromHash()){goStep(4);}else{loadState();applyUrlParams();updateProgress(1);}
+/* Prefill the AE email field even when there's no saved draft scope. */
+try{var _ae=localStorage.getItem('ps_ae_email')||'';var _el=document.getElementById('ae-email');if(_el&&_ae&&!_el.value)_el.value=_ae;}catch(e){}
 
 </script>
 </body>
